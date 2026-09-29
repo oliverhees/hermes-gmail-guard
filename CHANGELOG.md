@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 — 2026-09-29
+
+- **Docs fix / Korrektur:** Corrected the comparison with Google's official Gmail MCP — it has no send tool (drafts only). / Vergleich mit Googles offiziellem Gmail-MCP korrigiert: Er hat kein Senden-Werkzeug (nur Entwürfe).
+
 ## 0.1.0 — 2026-09-29 · Beta
 
 First public release. / Erstes öffentliches Release.

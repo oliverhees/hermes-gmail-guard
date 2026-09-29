@@ -151,14 +151,24 @@ geschützte Labels, Fingerabdruck, fremde Klicks, Doppelklicks, Not-Aus.
 
 ## ⚖️ Im Vergleich zu Googles Gmail-MCP
 
+Google bietet einen offiziellen [Gmail-MCP-Server](https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server?hl=de) an (Entwicklervorschau). **Der hat ebenfalls kein Senden-Werkzeug.** Er liest, sucht, setzt Labels und erstellt Entwürfe, die du selbst in Gmail sendest. Ein gutes Design. Die Unterschiede liegen woanders:
+
 | | Googles Gmail-MCP | Gmail Guard |
 |---|---|---|
-| Senden ohne dich | ⚠️ möglich | ❌ unmöglich |
-| Freigabe mit exakter Vorschau | ❌ | ✅ |
-| Masse-Bremse / Not-Aus | ❌ | ✅ |
+| Senden-Werkzeug | ❌ keins, nur Entwürfe | ❌ keins, nur Entwürfe |
+| Wer hält das Google-Token? | der MCP-Client (der Agent) | nur ein abgeschotteter Container |
+| Berechtigung | `gmail.compose`, die laut Google auch das Senden über die normale Gmail-API erlaubt¹ | Agent hat gar kein Google-Token |
+| Senden | von Hand in Gmail | von Hand in Gmail **oder** ein Tipp in Telegram mit Fingerabdruck der exakten Vorschau |
+| Archiv / Papierkorb / Spam | ❌ nicht vorhanden | ✅ mit Masse-Bremse + Tageslimit |
+| Not-Aus, Protokoll, Tagesbericht | ❌ | ✅ |
 | Wartung | ✅ Google | du |
+| Status | Entwicklervorschau | Beta |
 
-Super für **dich selbst** in einer Chat-Oberfläche. Für einen **autonomen** Agenten mit sensiblen Daten zählen harte Sperren mehr als Komfort.
+¹ *Ungetestete Annahme:* Ein Agent mit Terminal-Zugriff, der sein eigenes OAuth-Token lesen kann, könnte die Gmail-API grundsätzlich direkt ansprechen. Hat dein Agent keinen Terminal-Zugriff, entfällt dieser Punkt.
+
+**Faustregel:** Du selbst in einer Chat-Oberfläche → Googles MCP ist super. Ein autonomer Agent mit Terminal und sensiblen Daten → den Schlüssel außerhalb des Agenten halten.
+
+> **Korrektur (v0.1.1):** Eine frühere Version dieser README behauptete, Googles Gmail-MCP könne ohne dich senden. Das war falsch. Danke an das Community-Mitglied, das mit Quelle darauf hingewiesen hat.
 
 ---
 

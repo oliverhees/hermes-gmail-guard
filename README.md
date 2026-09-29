@@ -146,14 +146,24 @@ check, stranger clicks, double clicks, kill switch.
 
 ## ⚖️ Compared to Google's Gmail MCP
 
+Google offers an official [Gmail MCP server](https://developers.google.com/workspace/gmail/api/guides/configure-mcp-server) (Developer Preview). **It has no send tool either** — it reads, searches, labels and creates drafts that you send yourself in Gmail. A good design. The differences lie elsewhere:
+
 | | Google's Gmail MCP | Gmail Guard |
 |---|---|---|
-| Send without you | ⚠️ possible | ❌ impossible |
-| Exact-preview approval | ❌ | ✅ |
-| Bulk brake / kill switch | ❌ | ✅ |
+| Send tool | ❌ none — drafts only | ❌ none — drafts only |
+| Who holds the Google token | the MCP client (the agent) | only an isolated container |
+| Token scope | `gmail.compose` — per Google, this scope also permits sending via the regular Gmail API¹ | agent holds no Google token at all |
+| Sending | manually in Gmail | manually in Gmail **or** one tap in Telegram with an exact-preview fingerprint |
+| Archive / trash / spam | ❌ not available | ✅ with bulk brake + daily limit |
+| Kill switch, audit log, daily report | ❌ | ✅ |
 | Maintenance | ✅ Google | you |
+| Status | Developer Preview | Beta |
 
-Great for **you** in a chat UI. For an **autonomous** agent with sensitive data, hard locks matter more than convenience.
+¹ *Untested assumption:* an agent with shell access that can read its own OAuth token could, in principle, call the Gmail API directly. If your agent has no shell access, this doesn't apply.
+
+**Rule of thumb:** You in a chat UI → Google's MCP is great. An autonomous agent with shell access and sensitive data → keep the key outside the agent.
+
+> **Correction (v0.1.1):** An earlier version of this README claimed Google's Gmail MCP could send mail without you. That was wrong — thanks to the community member who pointed it out with the source.
 
 ---
 
