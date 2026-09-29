@@ -1,0 +1,3 @@
+-r gmail-guard/requirements.txt
+-r freigabe-bot/requirements.txt
+pytest>=8

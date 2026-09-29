@@ -1,0 +1,43 @@
+# gmail-guard + freigabe-bot
+# Wichtig: KEIN "ports:" beim gmail-guard → nicht aus dem Internet erreichbar.
+# MetaMCP spricht ihn über ein gemeinsames Docker-Netz an (Variante A in der README).
+
+x-hardening: &hardening
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+  mem_limit: 512m
+  pids_limit: 200
+
+services:
+  gmail-guard:
+    <<: *hardening
+    build: { context: ., dockerfile: gmail-guard/Dockerfile }
+    container_name: gmail-guard
+    env_file: guard.env
+    volumes:
+      - ./secrets/guard-tokens:/data/tokens:ro
+      - shared-db:/shared
+    networks: [default, metamcp]
+    # Variante B (MetaMCP läuft auf einem ANDEREN Server): nur an Tailscale-IP binden
+    # ports: ["${TAILSCALE_IP}:8765:8000"]
+
+  freigabe-bot:
+    <<: *hardening
+    build: { context: ., dockerfile: freigabe-bot/Dockerfile }
+    container_name: freigabe-bot
+    env_file: bot.env
+    volumes:
+      - ./secrets/bot-tokens:/data/tokens:ro
+      - shared-db:/shared
+    networks: [default]
+
+volumes:
+  shared-db:
+
+networks:
+  metamcp:
+    external: true
+    name: ${METAMCP_NETWORK:-metamcp_default}

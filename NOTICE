@@ -1,0 +1,21 @@
+Gmail Guard for Hermes (hermes-gmail-guard)
+Copyright (c) 2026 Oliver Hees aka Aiianer — https://aiianer.de
+
+This product is part of the AIIANER ecosystem.
+Dieses Produkt ist Teil des AIIANER-Ökosystems.
+
+Licensing / Lizenzierung: dual license (AGPL-3.0 / commercial) — see LICENSE and LICENSING.md.
+
+Trademarks / Marken: "AIIANER" is a trademark of Oliver Hees. The code license
+grants no rights to this name or logo.
+
+"Hermes" is an open-source project by Nous Research
+(github.com/NousResearch/hermes-agent). "Gmail" and "Google Workspace" are
+trademarks of Google LLC. This project is an independent community project and
+has no official affiliation with Nous Research or Google.
+
+Third-party software (not bundled, installed via pip): mcp (MIT),
+google-api-python-client (Apache-2.0), google-auth (Apache-2.0),
+google-auth-oauthlib (Apache-2.0), cryptography (Apache-2.0/BSD),
+python-telegram-bot (LGPL-3.0), pypdf (BSD-3-Clause), python-docx (MIT),
+uvicorn (BSD-3-Clause), tzdata (Apache-2.0).

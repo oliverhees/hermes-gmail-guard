@@ -1,0 +1,7 @@
+mcp>=1.20,<2
+uvicorn>=0.30
+google-api-python-client>=2.150
+google-auth>=2.35
+cryptography>=43
+pypdf>=5.0
+python-docx>=1.1

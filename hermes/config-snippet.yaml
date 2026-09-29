@@ -1,0 +1,14 @@
+# In ~/.hermes/config.yaml einfügen (auf BEIDEN Rechnern: lokal + VPS)
+# Den API-Key NICHT hier reinschreiben, sondern in ~/.hermes/.env:
+#   METAMCP_GMAIL_KEY=sk_mt_...   (nur der Key, OHNE "Bearer")
+
+mcp_servers:
+  gmail:
+    url: "https://DEIN-METAMCP-HOST/metamcp/gmail/mcp"
+    headers:
+      Authorization: "Bearer ${METAMCP_GMAIL_KEY}"
+    enabled: true
+    timeout: 120
+    tools:
+      resources: false
+      prompts: false

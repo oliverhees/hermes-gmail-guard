@@ -1,0 +1,5 @@
+python-telegram-bot[job-queue]>=21.6,<23
+google-api-python-client>=2.150
+google-auth>=2.35
+cryptography>=43
+tzdata

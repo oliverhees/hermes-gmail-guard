@@ -1,0 +1,12 @@
+guard.env
+bot.env
+secrets/
+out/
+*.enc
+client_secret*.json
+__pycache__/
+.pytest_cache/
+*.db
+*.db-wal
+*.db-shm
+.env

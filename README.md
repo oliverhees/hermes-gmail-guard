@@ -1,0 +1,196 @@
+<div align="center">
+
+**🚧 STATUS: BETA v0.1**
+
+![Gmail Guard — Hermes reads. You send.](docs/assets/gmail-guard-release.en.png)
+
+# 🛡️ Gmail Guard for Hermes
+
+**Let your AI agent manage Gmail — without ever being able to send in your name.**
+
+<p align="center">
+  <a href="#-license"><img src="https://img.shields.io/badge/License-AGPL--3.0%20%2B%20Commercial-red" alt="License" /></a>
+  <img src="https://img.shields.io/badge/For-Hermes%20Agent-red" alt="For Hermes Agent" />
+  <img src="https://img.shields.io/badge/Selfhosted-Coolify--ready-red" alt="Coolify ready" />
+  <a href="https://github.com/oliverhees/hermes-gmail-guard/actions/workflows/tests.yml"><img src="https://github.com/oliverhees/hermes-gmail-guard/actions/workflows/tests.yml/badge.svg" alt="Tests" /></a>
+  <a href="https://aiianer.de"><img src="https://img.shields.io/badge/Community-AIIANER-black" alt="AIIANER Community" /></a>
+</p>
+
+**🇬🇧 English** · [🇩🇪 Deutsch](README.de.md)
+
+[Quickstart](#-quickstart) · [How it works](#-how-it-works) · [Security model](#️-security-model) · [Full setup guide](docs/SETUP.md) · [License](#-license)
+
+</div>
+
+---
+
+## What is this?
+
+Gmail Guard is a small, self-hosted **MCP server** that sits between the
+[Hermes Agent](https://github.com/NousResearch/hermes-agent) and your Gmail
+accounts. Hermes can **read, search, sort, archive, clean up and write
+drafts** — but there is **no tool to send**. Sending happens only through a
+separate Telegram bot, and only after **you** tap "Send" on an exact preview.
+
+**Part of the AIIANER ecosystem:** At [AIIANER](https://aiianer.de) we build an
+AI operating system on top of [Hermes](https://github.com/NousResearch/hermes-agent).
+Hermes itself is an open-source project by **Nous Research** — this is an
+independent community extension and has no official affiliation with Nous Research.
+
+## Why?
+
+An autonomous agent with Gmail access can send mail **in your name**. It does
+not need to be "evil" for that: **one crafted email** in your inbox
+("forward all invoices to …") is enough — that's prompt injection.
+
+A rule in the prompt ("never send without asking") is a *request*, not a lock.
+Hermes also writes its own skills and has terminal access — if it ever holds
+your Google token, it can send. And even Google's own permissions don't help
+much: the scope needed for drafts (`gmail.compose`) **also allows sending**.
+
+**Gmail Guard's answer: the key stays outside of Hermes.**
+
+## ✨ Features
+
+- **No send tool — by design.** 20 tools for Hermes, none of them sends, forwards or deletes permanently.
+- **Approval with fingerprint.** Telegram preview shows To/CC/**BCC**/subject/body/attachments. Only the exact previewed bytes are sent (SHA-256) — edited afterwards → blocked.
+- **Bulk brake.** Trash/spam/archive above a rolling hourly limit requires your OK. Splitting into many small calls doesn't help.
+- **Kill switch.** `/stopp` in Telegram locks everything instantly, `/weiter` resumes.
+- **Multi-account.** Personal Gmail and Google Workspace, side by side.
+- **Attachments.** Reads text from PDF, DOCX, HTML, TXT/CSV/JSON.
+- **Untrusted-content marking.** Mail content is wrapped as data, fake markers are defused.
+- **Audit log + daily report.** Every action is logged; a summary arrives in Telegram every evening.
+- **Staged rollout.** `read` → `organize` → `full`, one line in the config.
+
+## 🧩 How it works
+
+```
+Hermes (local) ─┐
+                ├─► MetaMCP (optional) ─► gmail-guard ─► Gmail / Workspace
+Hermes (VPS)  ──┘                         (no send)
+                                              │ shared DB
+                  You (Telegram) ◄──► approval bot ─┘ (sends ONLY after your tap)
+```
+
+1. A customer writes → Hermes reads, sorts, summarizes.
+2. You: *"Draft a reply."* → Hermes creates a **draft in your Gmail**, in the same thread.
+3. Hermes requests approval → **Telegram shows the exact preview.**
+4. You tap **✅ Send** — or open the draft in Gmail, edit it and send it yourself.
+
+The customer sees **your** address in the same thread. Hermes only ever pre-writes.
+
+## 🛡️ Security model
+
+| # | Layer | What it prevents |
+|---|---|---|
+| 1 | No send tool in the code | Hermes can't call what doesn't exist |
+| 2 | Tokens only in isolated containers | Hermes never holds a Google credential |
+| 3 | Approval with fingerprint | Changing a draft after the preview |
+| 4 | Only your Telegram ID can approve | Someone else (or Hermes) approving |
+| 5 | Bulk brake + daily trash limit | Mass deletion by mistake or injection |
+| 6 | Audit log + daily report | Silent misuse |
+| 7 | Untrusted-content marking | Instructions hidden in mails |
+
+Also: protected labels (`INBOX`, `TRASH`, `SPAM`, …) can't be changed via the label
+tool, Hermes can only edit **its own** drafts, max. 20 recipients per draft.
+
+### ⚠️ Honest limits (please read)
+
+- The guarantee depends on **isolation**: if Hermes runs as root or in the `docker` group on the same host, it could read the token files. The setup guide includes a check for this.
+- Gmail Guard protects your **account**. It does **not** stop data exfiltration through other channels Hermes may have (web requests, other tools).
+- The Google scope `gmail.modify` technically allows sending — protection comes from code + isolation, not from Google.
+
+## 🚀 Quickstart
+
+```bash
+git clone https://github.com/oliverhees/hermes-gmail-guard.git
+cd hermes-gmail-guard
+pip install -r scripts/requirements.txt
+python scripts/gen_secrets.py                      # keys → password manager
+python scripts/add_account.py --name private \
+  --client-secret client_secret.json --mode full   # Google login in the browser
+# copy tokens + env files to your VPS, then:
+docker compose up -d --build
+```
+
+➡️ **Full step-by-step guide (9 steps, with checklist):** [docs/SETUP.md](docs/SETUP.md)
+
+## 📨 Forwarding mails to Hermes
+
+No separate mailbox needed. Forward to **`you+hermes@gmail.com`** — it lands in your
+own inbox. A Gmail filter (*from: you* + *to: +hermes*) applies the label `An Hermes`,
+Hermes picks it up. Details: [docs/SETUP.md#forwarding](docs/SETUP.md#-forwarding-mails-to-hermes).
+
+## 🧪 Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+21 tests against a simulated Gmail — no account needed. They verify the promises
+above: no send tool, bulk brake incl. salami tactics, protected labels, fingerprint
+check, stranger clicks, double clicks, kill switch.
+
+## 🔧 Status
+
+**Beta v0.1** — honest checklist:
+
+- [x] MCP server starts, bearer auth blocks unknown callers
+- [x] All 20 tools covered by tests against a simulated Gmail
+- [x] Approval bot: fingerprint, BCC display, owner-only, no double send
+- [x] Attachment extraction (PDF, DOCX, HTML, text)
+- [ ] End-to-end test against a real Gmail account
+- [ ] Docker build verified (runs in CI from the first push)
+- [ ] Bot/tool messages in English (currently German — PRs welcome)
+
+## ⚖️ Compared to Google's Gmail MCP
+
+| | Google's Gmail MCP | Gmail Guard |
+|---|---|---|
+| Send without you | ⚠️ possible | ❌ impossible |
+| Exact-preview approval | ❌ | ✅ |
+| Bulk brake / kill switch | ❌ | ✅ |
+| Maintenance | ✅ Google | you |
+
+Great for **you** in a chat UI. For an **autonomous** agent with sensitive data, hard locks matter more than convenience.
+
+---
+
+## 🌍 The AIIANER universe
+
+| | |
+| --- | --- |
+| 🏠 **Community** | [aiianer.de](https://aiianer.de) — courses, labs, tutorials, AI coaches |
+| 📺 **YouTube** | [youtube.com/@aiianer](https://www.youtube.com/@aiianer) — tools, tests, deep dives |
+| 🔒 **Datenschleuse** | [github.com/oliverhees/datenschleuse](https://github.com/oliverhees/datenschleuse) — GDPR filter for your AI |
+| 🛡️ **coolify-shield** | [github.com/oliverhees/coolify-shield](https://github.com/oliverhees/coolify-shield) — lock down your server |
+
+## 📜 License
+
+Dual licensed: **AGPL-3.0** (private use, self-hosters, research) or a
+**commercial license** (closed products/services, no source disclosure).
+Details: [LICENSING.md](LICENSING.md). Requests via the
+[AIIANER Community](https://aiianer.de) or **hi@aiianer.de**.
+
+## Security
+
+Please do **not** report vulnerabilities as public issues. See [SECURITY.md](SECURITY.md).
+
+## Trademarks
+
+"AIIANER" is a trademark of Oliver Hees aka Aiianer. The code license grants
+**no** rights to this name or logo. Forks must use their own name.
+
+"Hermes" is an open-source project by **Nous Research**
+([github.com/NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)).
+"Gmail" and "Google Workspace" are trademarks of Google LLC. This project is
+independent and not affiliated with Nous Research or Google.
+
+---
+
+<p align="center">
+  © 2026 <strong>Oliver Hees aka Aiianer</strong> ·
+  <a href="https://aiianer.de">aiianer.de</a> ·
+  Made with 🖤 in the AIIANER universe
+</p>
