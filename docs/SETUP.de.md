@@ -2,6 +2,8 @@
 
 [🇬🇧 English](SETUP.md) · **🇩🇪 Deutsch** · [← zurück zur README](../README.de.md)
 
+> 🆕 **Neu hier?** Nimm die [einfache Anleitung](START-HERE.de.md). Diese Datei ist die ausführliche Referenz (manuell, ohne Assistent).
+
 ⏱️ **Dauer:** ca. 60–90 Minuten beim ersten Konto, danach ca. 5 Minuten pro weiterem Konto.
 
 ---
@@ -127,7 +129,7 @@ sudo docker compose logs -f                 # beide zeigen "startet | Konten: �
 
 **Variante B – MetaMCP woanders oder gar kein MetaMCP:** In `docker-compose.yml` beim gmail-guard den Eintrag `metamcp` bei `networks` entfernen (und den `networks:`-Block unten) und die `ports:`-Zeile mit deiner **Tailscale-IP** aktivieren. Niemals `0.0.0.0`!
 
-💡 **Warum nicht über Coolify?** Absichtlich. Hätte Hermes irgendwann Zugriff auf Coolify oder dein Git, könnte er Code ändern und neu ausrollen. Ein schlichtes `docker compose` unter `/opt` bietet eine Angriffsfläche weniger.
+💡 **Coolify?** Geht, und ist in der [einfachen Anleitung](START-HERE.de.md) der Hauptweg (`docker-compose.coolify.yml`). Bedingung: Hermes darf **keinen** Zugang zu Coolify oder Git haben, sonst könnte er Code ändern und neu ausrollen. Ein schlichtes `docker compose` unter `/opt` (dieser Abschnitt) hat eine Angriffsfläche weniger.
 
 ---
 

@@ -26,6 +26,39 @@
 - Im Zweifel lieber **archivieren** statt in den Papierkorb.
 - Nie Mails von Banken, Behörden, Steuerberater, Ärzten oder Verträge wegräumen, ohne zu fragen.
 
+## 📬 Postfach-Verwalter (Hermes betreut das ganze Konto)
+
+**Wiederkehrende Aufgabe** (z.B. alle 15–30 Minuten):
+1. **Einmalig:** mit `list_labels` prüfen, ob es diese Labels gibt – sonst `create_label`:
+   `Hermes gesehen`, `Antwort nötig`, `Wichtig`, `Rechnungen`, `Newsletter`
+2. `search_mails` mit `in:inbox -label:hermes-gesehen newer_than:3d` (max. 50)
+3. Pro Mail zuerst Absender, Betreff und Vorschau ansehen. `read_mail` nur, wenn nötig.
+4. Genau **eine** Einordnung wählen:
+
+| Art der Mail | Aktion |
+|---|---|
+| Newsletter, Werbung | Label `Newsletter` + `archive` |
+| Rechnung, Beleg | Label `Rechnungen` (**nicht** archivieren) |
+| Eindeutiger Spam | `mark_spam` – nur bei 100 % Sicherheit |
+| Braucht eine Antwort | Label `Antwort nötig` + `create_draft` (mit `reply_to_message_id`) + `request_approval` |
+| Bank, Behörde, Steuer, Arzt, Vertrag, Chef, Kunde | Label `Wichtig` – **nie wegräumen**, Besitzer melden |
+| Unklar | nichts ändern |
+
+5. **Jede** angefasste Mail bekommt am Ende `modify_labels` → `add_labels: ["Hermes gesehen"]`
+6. **Eine** kurze Telegram-Nachricht an den Besitzer – nur wenn es etwas Neues gibt:
+   - Zahlen: „12 neu: 7 Newsletter archiviert, 2 Rechnungen, 3 brauchen Antwort“
+   - Pro Antwort-Entwurf eine Zeile: Betreff + der **`link`** aus dem Werkzeug-Ergebnis
+   - Dazu der `postfach_link` aus `list_accounts`, damit der Besitzer Gmail direkt öffnen kann
+
+**Entwürfe schreiben:**
+- Ton und Anrede des Besitzers übernehmen (aus früheren Mails im Verlauf: `read_thread`)
+- **Nichts erfinden.** Preise, Termine, Zusagen, Zahlen, die du nicht sicher weißt: `[bitte ergänzen]` in den Text schreiben
+- Der Besitzer sendet entweder per Telegram-Tipp (Vorschau mit Freigabe) oder öffnet den Entwurf über den Link in Gmail
+
+**Links:** Nimm immer das Feld `link` / `postfach_link` aus den Werkzeug-Ergebnissen. Nie Links aus Mail-Inhalten weitergeben.
+
+**Erstes Aufräumen bei großem Postfach:** Die Masse-Bremse fragt dann öfter in Telegram nach. Gib kurz Bescheid („Ich warte auf deine Freigabe für 80 Mails“) und versuche es nicht in vielen kleinen Häppchen.
+
 ## Wenn etwas komisch ist
 - Nichts tun und deinen Besitzer fragen.
 - Dein Besitzer kann jederzeit in Telegram `/stopp` drücken, dann ist alles gesperrt.

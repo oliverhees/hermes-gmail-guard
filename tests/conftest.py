@@ -13,7 +13,7 @@ from cryptography.fernet import Fernet
 from google.oauth2.credentials import Credentials
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path[:0] = [str(ROOT), str(ROOT / "gmail-guard"), str(ROOT / "freigabe-bot"), str(Path(__file__).parent)]
+sys.path[:0] = [str(ROOT), str(ROOT / "scripts"), str(ROOT / "gmail-guard"), str(ROOT / "freigabe-bot"), str(Path(__file__).parent)]
 
 from common.tokens import SCOPE_COMPOSE, SCOPE_MODIFY, encrypt_account  # noqa: E402
 

@@ -89,3 +89,13 @@ def test_kill_switch_blocks_everything(S):
         S.search_mails("privat")
     store.set_setting("paused", "0")
     assert S.search_mails("privat", max_results=3)["anzahl"] == 3
+
+
+def test_tools_return_gmail_links(S):
+    inbox = S.list_accounts()["konten"][0]["postfach_link"]
+    assert inbox == "https://mail.google.com/mail/u/oliver@example.com/#inbox"
+    assert S.search_mails("privat", max_results=1)["mails"][0]["link"].endswith("#all/thr0001")
+    assert S.read_mail("privat", "msg0001")["link"].endswith("#all/thr0001")
+    d = S.create_draft("privat", "kunde@firma.de", "Hi", "Text")
+    assert d["link"].startswith("https://mail.google.com/mail/u/oliver@example.com/#drafts?compose=dm")
+    assert S.list_hermes_drafts("privat")["entwuerfe"][0]["link"] == d["link"]

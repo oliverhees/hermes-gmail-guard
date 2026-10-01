@@ -1,4 +1,4 @@
-"""Verschlüsselte Google-Tokens (eine Datei pro Konto: <name>.enc)."""
+"""Verschlüsselte Google-Tokens (eine Datei pro Konto: <name>.enc, oder per Umgebungsvariable)."""
 import json
 import os
 import re
@@ -39,14 +39,24 @@ def encrypt_account(key: str, name: str, email: str, scopes: list, creds: Creden
     return Fernet(key.encode()).encrypt(json.dumps(payload).encode())
 
 
-def load_accounts(tokens_dir: str, key_env: str) -> dict:
+def _blobs(tokens_dir: str, accounts_env: str | None):
+    """Verschlüsselte Token aus Dateien (<name>.enc) UND/ODER aus einer Umgebungsvariable
+    (kommagetrennt, z.B. für Coolify, wo es keine Dateien gibt)."""
+    for p in sorted(Path(tokens_dir).glob("*.enc")):
+        yield p.name, p.read_bytes()
+    if accounts_env:
+        for i, blob in enumerate(b for b in os.environ.get(accounts_env, "").split(",") if b.strip()):
+            yield f"{accounts_env}[{i + 1}]", blob.strip().encode()
+
+
+def load_accounts(tokens_dir: str, key_env: str, accounts_env: str | None = None) -> dict:
     f = _fernet(key_env)
     accounts = {}
-    for p in sorted(Path(tokens_dir).glob("*.enc")):
-        info = json.loads(f.decrypt(p.read_bytes()))
+    for source, blob in _blobs(tokens_dir, accounts_env):
+        info = json.loads(f.decrypt(blob))
         name = info["name"]
         if not NAME_RE.match(name):
-            raise SystemExit(f"Ungültiger Kontoname in {p.name}")
+            raise SystemExit(f"Ungültiger Kontoname in {source}")
         creds = Credentials.from_authorized_user_info(info["creds"], info["scopes"])
         accounts[name] = Account(name=name, email=info["email"], scopes=info["scopes"], creds=creds)
     return accounts

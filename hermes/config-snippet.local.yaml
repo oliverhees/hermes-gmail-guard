@@ -1,0 +1,15 @@
+# Hermes und Gmail Guard laufen beide auf DEM GLEICHEN Rechner (docker-compose.local.yml).
+# In ~/.hermes/config.yaml einfügen.
+# Den Schlüssel NICHT hier reinschreiben, sondern in ~/.hermes/.env:
+#   GMAIL_GUARD_KEY=...   (der Wert MCP_BEARER_TOKEN aus guard.env, nur der Wert, OHNE "Bearer")
+
+mcp_servers:
+  gmail:
+    url: "http://localhost:8765/mcp"      # Hermes selbst in Docker: http://host.docker.internal:8765/mcp
+    headers:
+      Authorization: "Bearer ${GMAIL_GUARD_KEY}"
+    enabled: true
+    timeout: 120
+    tools:
+      resources: false
+      prompts: false

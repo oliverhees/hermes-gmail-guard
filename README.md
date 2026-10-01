@@ -18,7 +18,7 @@
 
 **🇬🇧 English** · [🇩🇪 Deutsch](README.de.md)
 
-[Quickstart](#-quickstart) · [How it works](#-how-it-works) · [Security model](#️-security-model) · [Full setup guide](docs/SETUP.md) · [License](#-license)
+[Quickstart](#-quickstart) · [Whole mailbox](#-manage-the-whole-mailbox) · [How it works](#-how-it-works) · [Security model](#️-security-model) · [Easy guide](docs/START-HERE.md) · [License](#-license)
 
 </div>
 
@@ -56,6 +56,7 @@ much: the scope needed for drafts (`gmail.compose`) **also allows sending**.
 - **Approval with fingerprint.** Telegram preview shows To/CC/**BCC**/subject/body/attachments. Only the exact previewed bytes are sent (SHA-256) — edited afterwards → blocked.
 - **Bulk brake.** Trash/spam/archive above a rolling hourly limit requires your OK. Splitting into many small calls doesn't help.
 - **Kill switch.** `/stopp` in Telegram locks everything instantly, `/weiter` resumes.
+- **Gmail links.** Every result (mail, draft, mailbox) carries a direct link; in Telegram a button opens the draft in Gmail.
 - **Multi-account.** Personal Gmail and Google Workspace, side by side.
 - **Attachments.** Reads text from PDF, DOCX, HTML, TXT/CSV/JSON.
 - **Untrusted-content marking.** Mail content is wrapped as data, fake markers are defused.
@@ -102,24 +103,42 @@ tool, Hermes can only edit **its own** drafts, max. 20 recipients per draft.
 
 ## 🚀 Quickstart
 
+**3 steps. The assistant does the rest.**
+
+| | What | Where |
+|---|---|---|
+| 1️⃣ | Create Google access + Telegram bot (click-by-click guide) | browser, Telegram |
+| 2️⃣ | `python scripts/setup.py` – asks questions, generates all keys, connects Gmail | your computer |
+| 3️⃣ | Start: **Coolify** (paste the Docker Compose) **or** `docker compose -f docker-compose.local.yml up -d` | server **or** your computer |
+
 ```bash
 git clone https://github.com/oliverhees/hermes-gmail-guard.git
 cd hermes-gmail-guard
 pip install -r scripts/requirements.txt
-python scripts/gen_secrets.py                      # keys → password manager
-python scripts/add_account.py --name private \
-  --client-secret client_secret.json --mode full   # Google login in the browser
-# copy tokens + env files to your VPS, then:
-docker compose up -d --build
+python scripts/setup.py
 ```
 
-➡️ **Full step-by-step guide (9 steps, with checklist):** [docs/SETUP.md](docs/SETUP.md)
+➡️ **Beginner guide, every step with a checkbox:** [docs/START-HERE.md](docs/START-HERE.md)
 
-## 📨 Forwarding mails to Hermes
+**Does it have to run on a server?** No. Gmail Guard also runs on your own computer, but only while the computer is on. On a server (e.g. with Coolify) it runs permanently and is safer. **Hermes itself can stay local.**
 
-No separate mailbox needed. Forward to **`you+hermes@gmail.com`** — it lands in your
-own inbox. A Gmail filter (*from: you* + *to: +hermes*) applies the label `An Hermes`,
-Hermes picks it up. Details: [docs/SETUP.md#forwarding](docs/SETUP.md#-forwarding-mails-to-hermes).
+## 📬 Manage the whole mailbox
+
+Hermes looks after your complete Gmail, not just forwarded mails:
+
+- 🏷️ creates **labels** and **sorts** mail
+- 🚫 clears away **spam and newsletters** (large amounts only with your OK)
+- 👀 regularly checks **what's new**
+- ✍️ writes **reply drafts** straight into your Gmail, in the same thread
+- 📱 pings you on Telegram with a **link to the draft in Gmail**
+- ✅ sends only when **you** tap in Telegram or send in Gmail yourself
+
+Ready-made rules for Hermes: [hermes/gmail-rules.md](hermes/gmail-rules.md) → section "Inbox manager".
+
+### Hand single mails to Hermes (optional)
+
+No separate mailbox needed: forward to **`you+hermes@gmail.com`**, a Gmail filter applies the label
+`An Hermes`, Hermes picks it up. Details: [docs/SETUP.md](docs/SETUP.md#-forwarding-mails-to-hermes).
 
 ## 🧪 Tests
 
@@ -128,7 +147,7 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-21 tests against a simulated Gmail — no account needed. They verify the promises
+30 tests against a simulated Gmail — no account needed. They verify the promises
 above: no send tool, bulk brake incl. salami tactics, protected labels, fingerprint
 check, stranger clicks, double clicks, kill switch.
 
@@ -140,6 +159,8 @@ check, stranger clicks, double clicks, kill switch.
 - [x] All 20 tools covered by tests against a simulated Gmail
 - [x] Approval bot: fingerprint, BCC display, owner-only, no double send
 - [x] Attachment extraction (PDF, DOCX, HTML, text)
+- [x] Setup assistant, compose files for local and Coolify (tokens via environment variable)
+- [ ] Coolify compose and setup assistant tested against real Coolify/Google (so far only with simulated data)
 - [ ] End-to-end test against a real Gmail account
 - [ ] Docker build verified (runs in CI from the first push)
 - [ ] Bot/tool messages in English (currently German — PRs welcome)

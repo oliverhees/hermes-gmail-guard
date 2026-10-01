@@ -1,0 +1,56 @@
+# Für Coolify: Resource → Docker Compose → diese Datei auswählen.
+# Alle Werte kommen aus den Coolify-"Environment Variables" (Inhalt von out/settings.env,
+# erzeugt von scripts/setup.py). Es werden keine Dateien auf dem Server gebraucht.
+#
+# Verbindung zu MetaMCP: Beide Dienste hängen im Coolify-Netz "coolify".
+# Als URL in MetaMCP:  http://gmail-guard:8000/mcp
+# ACHTUNG: Hermes darf KEINEN Zugang zu Coolify haben (siehe docs/START-HERE.de.md).
+
+x-hardening: &hardening
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+  mem_limit: 512m
+  pids_limit: 200
+
+services:
+  gmail-guard:
+    <<: *hardening
+    build: { context: ., dockerfile: gmail-guard/Dockerfile }
+    environment:
+      - GUARD_MODE=${GUARD_MODE:-read}
+      - GUARD_TOKEN_KEY=${GUARD_TOKEN_KEY}
+      - MCP_BEARER_TOKEN=${MCP_BEARER_TOKEN}
+      - GUARD_ACCOUNTS=${GUARD_ACCOUNTS}
+      - TZ=${TZ:-Europe/Berlin}
+      - BRAKE_TRASH=${BRAKE_TRASH:-20}
+      - BRAKE_SPAM=${BRAKE_SPAM:-20}
+      - BRAKE_ARCHIVE=${BRAKE_ARCHIVE:-50}
+      - DAILY_TRASH_LIMIT=${DAILY_TRASH_LIMIT:-100}
+    volumes:
+      - shared-db:/shared
+    networks:
+      default:
+      coolify:
+        aliases: [gmail-guard]
+
+  freigabe-bot:
+    <<: *hardening
+    build: { context: ., dockerfile: freigabe-bot/Dockerfile }
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_ALLOWED_USER_ID=${TELEGRAM_ALLOWED_USER_ID}
+      - BOT_TOKEN_KEY=${BOT_TOKEN_KEY}
+      - BOT_ACCOUNTS=${BOT_ACCOUNTS}
+      - TZ=${TZ:-Europe/Berlin}
+    volumes:
+      - shared-db:/shared
+
+volumes:
+  shared-db:
+
+networks:
+  coolify:
+    external: true

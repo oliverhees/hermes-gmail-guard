@@ -108,3 +108,12 @@ def test_bulk_job_approval(env):
     asyncio.run(B.poll(ctx))
     click(B, ctx, OLIVER, f"bj:ok:{jid}")
     assert store.get_job(jid)["status"] == "approved"
+
+
+def test_preview_has_direct_link_to_the_draft_in_gmail(env):
+    B, fake, ctx, sent = env
+    draft(fake, "r5")
+    store.create_approval("privat", "r5", "")
+    asyncio.run(B.poll(ctx))
+    buttons = [b for row in sent[-1]["reply_markup"].inline_keyboard for b in row]
+    assert buttons[-1].url == "https://mail.google.com/mail/u/oliver@example.com/#drafts?compose=dm"

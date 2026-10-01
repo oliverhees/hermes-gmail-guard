@@ -2,6 +2,8 @@
 
 **🇬🇧 English** · [🇩🇪 Deutsch](SETUP.de.md) · [← back to README](../README.md)
 
+> 🆕 **New here?** Use the [easy guide](START-HERE.md). This file is the detailed reference (manual, without the assistant).
+
 ⏱️ **Time:** about 60–90 minutes for the first account, then about 5 minutes per additional account.
 
 > ℹ️ The approval bot and the tool messages are currently in **German**. Bot commands: `/status`, `/heute` (today), `/stopp` (kill switch), `/weiter` (resume). English translations are welcome as PRs.
@@ -129,7 +131,7 @@ sudo docker compose logs -f                 # both should log "startet | Konten:
 
 **Option B – MetaMCP elsewhere, or no MetaMCP at all:** in `docker-compose.yml`, remove `metamcp` from the gmail-guard `networks` (and the `networks:` block at the bottom) and enable the `ports:` line bound to your **Tailscale IP**. Never `0.0.0.0`!
 
-💡 **Why not via Coolify?** On purpose. If Hermes ever gained access to Coolify or your git host, it could change the code and redeploy. A plain `docker compose` in `/opt` is one less attack surface.
+💡 **Coolify?** Works, and is the main path in the [easy guide](START-HERE.md) (`docker-compose.coolify.yml`). Condition: Hermes must have **no** access to Coolify or git, otherwise it could change the code and redeploy. A plain `docker compose` in `/opt` (this section) has one less attack surface.
 
 ---
 

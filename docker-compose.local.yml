@@ -1,0 +1,36 @@
+# Alles auf DIESEM Rechner (Docker Desktop reicht).
+# Start:  docker compose -f docker-compose.local.yml up -d --build
+# Hermes verbindet sich danach mit:  http://localhost:8765/mcp
+# (Läuft Hermes selbst in Docker: http://host.docker.internal:8765/mcp)
+# guard.env + bot.env schreibt:  python scripts/setup.py
+
+x-hardening: &hardening
+  read_only: true
+  tmpfs: [/tmp]
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+  mem_limit: 512m
+  pids_limit: 200
+
+services:
+  gmail-guard:
+    <<: *hardening
+    build: { context: ., dockerfile: gmail-guard/Dockerfile }
+    container_name: gmail-guard
+    env_file: guard.env
+    volumes:
+      - shared-db:/shared
+    # nur von diesem Rechner aus erreichbar (127.0.0.1), nie aus dem Netzwerk
+    ports: ["127.0.0.1:8765:8000"]
+
+  freigabe-bot:
+    <<: *hardening
+    build: { context: ., dockerfile: freigabe-bot/Dockerfile }
+    container_name: freigabe-bot
+    env_file: bot.env
+    volumes:
+      - shared-db:/shared
+
+volumes:
+  shared-db:

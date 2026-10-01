@@ -18,6 +18,7 @@ from datetime import datetime
 from datetime import time as dtime
 from email import policy
 from email.parser import BytesParser
+from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
 from googleapiclient.discovery import build
@@ -42,7 +43,7 @@ SUMMARY_HOUR = int(os.environ.get("SUMMARY_HOUR", 20))
 PREVIEW_CHARS = 1800
 
 store.init()
-ACCOUNTS = load_accounts(os.environ.get("TOKENS_DIR", "/data/tokens"), "BOT_TOKEN_KEY")
+ACCOUNTS = load_accounts(os.environ.get("TOKENS_DIR", "/data/tokens"), "BOT_TOKEN_KEY", "BOT_ACCOUNTS")
 ACTION_DE = {"archive": "archivieren", "trash": "in den Papierkorb legen", "spam": "als Spam markieren"}
 e = html.escape
 
@@ -58,7 +59,11 @@ def _svc(account):
 def fetch_draft(account, draft_id):
     svc, _ = _svc(account)
     d = svc.users().drafts().get(userId="me", id=draft_id, format="raw").execute(num_retries=2)
-    return d["message"]["raw"], d["message"].get("threadId")
+    return d["message"]["raw"], d["message"].get("threadId"), d["message"].get("id")
+
+
+def gmail_url(acc, fragment):
+    return f"https://mail.google.com/mail/u/{quote(acc.email, safe='@')}/#{fragment}"
 
 
 def send_exact(account, draft_id, raw, thread_id):
@@ -116,11 +121,12 @@ def approval_text(row, acc, m):
     return "\n".join(lines)
 
 
-def approval_buttons(row, acc):
+def approval_buttons(row, acc, message_id=None):
+    link = gmail_url(acc, f"drafts?compose={message_id}" if message_id else "drafts")
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("✅ Senden", callback_data=f"ap:ok:{row['id']}"),
          InlineKeyboardButton("❌ Ablehnen", callback_data=f"ap:no:{row['id']}")],
-        [InlineKeyboardButton("🔗 In Gmail öffnen", url=f"https://mail.google.com/mail/u/{acc.email}/#drafts")],
+        [InlineKeyboardButton("🔗 Entwurf in Gmail öffnen", url=link)],
     ])
 
 
@@ -149,7 +155,7 @@ async def notify(ctx, text):
 # ================================================================ Abfrage-Schleife
 async def present_approval(ctx, row):
     try:
-        raw, _ = await asyncio.to_thread(fetch_draft, row["account"], row["draft_id"])
+        raw, _, message_id = await asyncio.to_thread(fetch_draft, row["account"], row["draft_id"])
         acc = ACCOUNTS[row["account"]]
         m = parse_raw(raw)
     except Exception as ex:
@@ -161,7 +167,7 @@ async def present_approval(ctx, row):
                                     document=io.BytesIO(m["body"].encode()),
                                     caption=f"Volltext zu Freigabe #{row['id']}")
     msg = await ctx.bot.send_message(chat_id=ALLOWED, text=approval_text(row, acc, m),
-                                     parse_mode=ParseMode.HTML, reply_markup=approval_buttons(row, acc),
+                                     parse_mode=ParseMode.HTML, reply_markup=approval_buttons(row, acc, message_id),
                                      disable_web_page_preview=True)
     store.update_approval(row["id"], status="pending", hash=fingerprint(raw), tg_message_id=msg.message_id)
 
@@ -239,7 +245,7 @@ async def on_click(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
         if not store.transition_approval(rid, "pending", "sending"):
             return await finish("ℹ️ Wird bereits verarbeitet.")
         try:
-            raw, thread_id = await asyncio.to_thread(fetch_draft, row["account"], row["draft_id"])
+            raw, thread_id, _ = await asyncio.to_thread(fetch_draft, row["account"], row["draft_id"])
             if fingerprint(raw) != row["hash"]:
                 store.update_approval(rid, status="changed")
                 store.audit("bot", "send_blocked_changed", row["account"], 1, target=row["draft_id"])
@@ -274,7 +280,8 @@ async def cmd_start(update: Update, ctx):
         "/status – offene Anfragen\n"
         "/stopp – NOT-AUS: Hermes kann gar nichts mehr in Gmail\n"
         "/weiter – Not-Aus aufheben\n"
-        "/heute – Bericht für heute")
+        "/heute – Bericht für heute\n"
+        "/gmail – Links zu deinen Postfächern")
 
 
 async def cmd_status(update: Update, ctx):
@@ -284,6 +291,13 @@ async def cmd_status(update: Update, ctx):
     konten = ", ".join(f"{a.name} ({a.email})" for a in ACCOUNTS.values()) or "keine"
     await update.message.reply_text(f"Status: {paused}\n📨 Offene Sende-Freigaben: {ap}\n"
                                     f"🧹 Offene Masse-Freigaben: {jb}\n👤 Konten: {konten}")
+
+
+async def cmd_gmail(update: Update, ctx):
+    if not ACCOUNTS:
+        return await update.message.reply_text("Kein Konto eingerichtet.")
+    rows = [f'📬 <a href="{gmail_url(a, "inbox")}">{e(a.email)}</a>' for a in ACCOUNTS.values()]
+    await update.message.reply_text("\n".join(rows), parse_mode=ParseMode.HTML, disable_web_page_preview=True)
 
 
 async def cmd_stop(update: Update, ctx):
@@ -342,6 +356,7 @@ def main():
     app.add_handler(CommandHandler("stopp", cmd_stop, filters=me))
     app.add_handler(CommandHandler("weiter", cmd_resume, filters=me))
     app.add_handler(CommandHandler("heute", cmd_today, filters=me))
+    app.add_handler(CommandHandler("gmail", cmd_gmail, filters=me))
     app.add_handler(CallbackQueryHandler(on_click, pattern=r"^(ap|bj):(ok|no):\d+$"))
     app.job_queue.run_repeating(poll, interval=5, first=3)
     app.job_queue.run_daily(daily_summary, time=dtime(hour=SUMMARY_HOUR, tzinfo=TZ))

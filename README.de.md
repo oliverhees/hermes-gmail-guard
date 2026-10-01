@@ -18,7 +18,7 @@
 
 [🇬🇧 English](README.md) · **🇩🇪 Deutsch**
 
-[Schnellstart](#-schnellstart) · [So funktioniert's](#-so-funktionierts) · [Sicherheitsmodell](#️-sicherheitsmodell) · [Komplette Anleitung](docs/SETUP.de.md) · [Lizenz](#-lizenz)
+[Schnellstart](#-schnellstart) · [Ganzes Postfach](#-ganzes-postfach-verwalten) · [So funktioniert's](#-so-funktionierts) · [Sicherheitsmodell](#️-sicherheitsmodell) · [Einfache Anleitung](docs/START-HERE.de.md) · [Lizenz](#-lizenz)
 
 </div>
 
@@ -59,6 +59,7 @@ Berechtigungen helfen wenig: Die Berechtigung für Entwürfe (`gmail.compose`)
 - **Freigabe mit Fingerabdruck.** Die Telegram-Vorschau zeigt An/CC/**BCC**/Betreff/Text/Anhänge. Gesendet werden nur exakt die Bytes aus der Vorschau (SHA-256). Wird der Entwurf danach geändert, wird blockiert.
 - **Masse-Bremse.** Papierkorb, Spam und Archiv über einem stündlichen Limit brauchen dein OK. Viele kleine Aufrufe helfen nicht.
 - **Not-Aus.** `/stopp` in Telegram sperrt sofort alles, `/weiter` hebt die Sperre auf.
+- **Gmail-Links.** Jedes Ergebnis (Mail, Entwurf, Postfach) kommt mit Direktlink; in Telegram öffnet ein Knopf den Entwurf in Gmail.
 - **Mehrere Konten.** Privates Gmail und Google Workspace nebeneinander.
 - **Anhänge.** Liest Text aus PDF, DOCX, HTML sowie TXT/CSV/JSON.
 - **Fremd-Markierung.** Mailinhalte werden als Daten verpackt, gefälschte Markierungen entschärft.
@@ -106,25 +107,42 @@ pro Entwurf sind maximal 20 Empfänger erlaubt.
 
 ## 🚀 Schnellstart
 
+**3 Schritte. Der Assistent erledigt den Rest.**
+
+| | Was | Wo |
+|---|---|---|
+| 1️⃣ | Google-Zugang + Telegram-Bot anlegen (Klick-Anleitung) | Browser, Telegram |
+| 2️⃣ | `python scripts/setup.py` – beantwortet Fragen, erzeugt alle Schlüssel, verbindet Gmail | dein Rechner |
+| 3️⃣ | Starten: **Coolify** (Docker Compose einfügen) **oder** `docker compose -f docker-compose.local.yml up -d` | Server **oder** dein Rechner |
+
 ```bash
 git clone https://github.com/oliverhees/hermes-gmail-guard.git
 cd hermes-gmail-guard
 pip install -r scripts/requirements.txt
-python scripts/gen_secrets.py                      # Schlüssel → Passwortmanager
-python scripts/add_account.py --name privat \
-  --client-secret client_secret.json --mode full   # Google-Login im Browser
-# Tokens + Env-Dateien auf den VPS kopieren, dann:
-docker compose up -d --build
+python scripts/setup.py
 ```
 
-➡️ **Komplette Schritt-für-Schritt-Anleitung (9 Schritte, mit Checkliste):** [docs/SETUP.de.md](docs/SETUP.de.md)
+➡️ **Anleitung für Einsteiger, jeder Schritt mit Haken:** [docs/START-HERE.de.md](docs/START-HERE.de.md)
 
-## 📨 Mails an Hermes weiterleiten
+**Muss das auf einen Server?** Nein. Gmail Guard läuft auch auf deinem Rechner, aber nur dann, wenn der Rechner an ist. Auf einem Server (z.B. mit Coolify) läuft es dauerhaft und ist sicherer. **Hermes selbst darf lokal bleiben.**
 
-Ein eigenes Postfach ist nicht nötig. Leite an **`du+hermes@gmail.com`** weiter,
-dann landet die Mail in deinem eigenen Postfach. Ein Gmail-Filter (*von: du* +
-*an: +hermes*) setzt das Label `An Hermes`, und Hermes holt sie sich ab.
-Details: [docs/SETUP.de.md](docs/SETUP.de.md#-mails-an-hermes-weiterleiten).
+## 📬 Ganzes Postfach verwalten
+
+Hermes betreut dein komplettes Gmail, nicht nur weitergeleitete Mails:
+
+- 🏷️ legt **Labels** an und **sortiert** ein
+- 🚫 räumt **Spam und Newsletter** weg (große Mengen nur mit deinem OK)
+- 👀 prüft regelmäßig, **was neu reinkommt**
+- ✍️ schreibt **Antwort-Entwürfe** direkt in dein Gmail, im selben Verlauf
+- 📱 schickt dir per Telegram eine Meldung mit **Link zum Entwurf in Gmail**
+- ✅ gesendet wird nur, wenn **du** in Telegram tippst oder in Gmail selbst sendest
+
+Fertige Regeln für Hermes: [hermes/gmail-rules.de.md](hermes/gmail-rules.de.md) → Abschnitt „Postfach-Verwalter“.
+
+### Nur einzelne Mails an Hermes geben (optional)
+
+Kein eigenes Postfach nötig: Leite an **`du+hermes@gmail.com`** weiter, ein Gmail-Filter setzt das
+Label `An Hermes`, Hermes holt sie ab. Details: [docs/SETUP.de.md](docs/SETUP.de.md#-mails-an-hermes-weiterleiten).
 
 ## 🧪 Tests
 
@@ -133,7 +151,7 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-21 Tests gegen ein simuliertes Gmail, ohne echtes Konto. Sie prüfen die
+30 Tests gegen ein simuliertes Gmail, ohne echtes Konto. Sie prüfen die
 Versprechen oben: kein Senden-Werkzeug, Masse-Bremse inklusive Salami-Taktik,
 geschützte Labels, Fingerabdruck, fremde Klicks, Doppelklicks, Not-Aus.
 
@@ -145,6 +163,8 @@ geschützte Labels, Fingerabdruck, fremde Klicks, Doppelklicks, Not-Aus.
 - [x] Alle 20 Werkzeuge per Tests gegen ein simuliertes Gmail abgedeckt
 - [x] Freigabe-Bot: Fingerabdruck, BCC-Anzeige, nur Besitzer, kein Doppelversand
 - [x] Anhang-Extraktion (PDF, DOCX, HTML, Text)
+- [x] Setup-Assistent, Compose-Dateien für lokal und Coolify (Token per Umgebungsvariable)
+- [ ] Coolify-Compose und Setup-Assistent gegen echtes Coolify/Google getestet (bisher nur mit simulierten Daten)
 - [ ] End-to-End-Test gegen ein echtes Gmail-Konto
 - [ ] Docker-Build bestätigt (läuft ab dem ersten Push in der CI)
 - [ ] Bot- und Werkzeug-Meldungen auf Englisch (aktuell Deutsch, PRs willkommen)
