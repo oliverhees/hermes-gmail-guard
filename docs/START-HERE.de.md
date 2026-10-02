@@ -57,11 +57,16 @@ Das ist der längste Teil. Danach wird es leicht.
    - App-Name: `Hermes Gmail` · Support-E-Mail: deine
    - Zielgruppe: **Extern** (Workspace-Firmenkonto: **Intern**)
    - Kontakt-E-Mail: deine → fertigstellen
-5. Links **Zielgruppe** → **App veröffentlichen** → bestätigen („In Produktion“)
+5. Links **Branding** → ausfüllen und **Speichern**:
+   - Anwendungs-Startseite: deine Webseite (z.B. `https://aiianer.de`)
+   - Datenschutzerklärung: Link auf die Datenschutz-Seite dieser Webseite
+   - Autorisierte Domain: die Domain davon (z.B. `aiianer.de`)
+   - Ohne diese Angaben bleibt „App veröffentlichen“ **ausgegraut**.
+6. Links **Zielgruppe** → **App veröffentlichen** → bestätigen („In Produktion“)
    - ⚠️ **Nicht überspringen!** Sonst läuft der Zugang nach 7 Tagen ab.
    - (Nur bei „Intern“ nicht nötig.)
-6. Links **Clients** → **Client erstellen** → Typ **Desktop-App** → **Erstellen**
-7. **JSON herunterladen**
+7. Links **Clients** → **Client erstellen** → Typ **Desktop-App** → **Erstellen**
+8. **JSON herunterladen**
 
 **📦 Die Datei kommt in den Projektordner** (Name beginnt mit `client_secret`).
 

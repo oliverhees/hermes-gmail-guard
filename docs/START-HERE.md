@@ -59,11 +59,16 @@ This is the longest part. It gets easy afterwards.
    - App name: `Hermes Gmail` · support email: yours
    - Audience: **External** (Workspace company account: **Internal**)
    - Contact email: yours → finish
-5. Left: **Audience** → **Publish app** → confirm ("In production")
+5. Left: **Branding** → fill in and **Save**:
+   - Application home page: your website (e.g. `https://aiianer.de`)
+   - Privacy policy: link to the privacy page of that website
+   - Authorized domain: the domain of those links (e.g. `aiianer.de`)
+   - Without these, "Publish app" stays **greyed out**.
+6. Left: **Audience** → **Publish app** → confirm ("In production")
    - ⚠️ **Don't skip!** Otherwise access expires after 7 days.
    - (Not needed for "Internal".)
-6. Left: **Clients** → **Create client** → type **Desktop app** → **Create**
-7. **Download JSON**
+7. Left: **Clients** → **Create client** → type **Desktop app** → **Create**
+8. **Download JSON**
 
 **📦 Put the file into the project folder** (name starts with `client_secret`).
 
