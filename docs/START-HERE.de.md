@@ -147,7 +147,9 @@ Das ist der längste Teil. Danach wird es leicht.
 
 ## 7️⃣ Hermes zum Postfach-Verwalter machen ⏱️ 5 Min · 💬 Hermes
 
-1. Lege [`hermes/gmail-rules.de.md`](../hermes/gmail-rules.de.md) in Hermes' Gedächtnis oder als Skill ab
+1. Lege **beide** in Hermes' Gedächtnis oder als Skill ab:
+   - [`hermes/hermes-prompt.de.md`](../hermes/hermes-prompt.de.md): erklärt Hermes die Regeln und alle 16 Werkzeuge (nur dieser MCP, kein Senden, nur Entwürfe)
+   - [`hermes/gmail-rules.de.md`](../hermes/gmail-rules.de.md): die wiederkehrende Sortier-Aufgabe
 2. Sag Hermes **einmal**:
 
 > „Richte die Labels aus dem Abschnitt *Postfach-Verwalter* in meinem Konto `privat` ein. Sortiere dann die Mails der letzten 3 Tage. Lösche nichts.“

@@ -149,7 +149,9 @@ This is the longest part. It gets easy afterwards.
 
 ## 7️⃣ Turn Hermes into your inbox manager ⏱️ 5 min · 💬 Hermes
 
-1. Put [`hermes/gmail-rules.md`](../hermes/gmail-rules.md) into Hermes' memory or a skill
+1. Put **both** into Hermes' memory or a skill:
+   - [`hermes/hermes-prompt.md`](../hermes/hermes-prompt.md): explains the rules and all 16 tools to Hermes (this MCP only, no sending, drafts only)
+   - [`hermes/gmail-rules.md`](../hermes/gmail-rules.md): the recurring sorting task
 2. Tell Hermes **once**:
 
 > "Set up the labels from the section *Inbox manager* in my account `privat`. Then sort the mails of the last 3 days. Delete nothing."
