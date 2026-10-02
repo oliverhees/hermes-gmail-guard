@@ -18,7 +18,7 @@
 
 [🇬🇧 English](README.md) · **🇩🇪 Deutsch**
 
-[Schnellstart](#-schnellstart) · [Ganzes Postfach](#-ganzes-postfach-verwalten) · [So funktioniert's](#-so-funktionierts) · [Sicherheitsmodell](#️-sicherheitsmodell) · [Einfache Anleitung](docs/START-HERE.de.md) · [Lizenz](#-lizenz)
+[Schnellstart](#-schnellstart) · [Ganzes Postfach](#-ganzes-postfach-verwalten) · [Hermes-Prompt](#-prompt-für-hermes) · [Netzwerk-Fix](#-netzwerk-problem-lösen) · [So funktioniert's](#-so-funktionierts) · [Sicherheitsmodell](#️-sicherheitsmodell) · [Einfache Anleitung](docs/START-HERE.de.md) · [Lizenz](#-lizenz)
 
 </div>
 
@@ -116,7 +116,7 @@ pro Entwurf sind maximal 20 Empfänger erlaubt.
 | 2️⃣ | In Coolify das Repo mit `docker-compose.coolify.yml` starten, 3 Werte eintragen | Coolify |
 | 3️⃣ | Im Coolify-Terminal `python -m app.connect`, Link öffnen, „Erlauben“ | Coolify + Browser |
 
-Den Rest (Schlüssel, Zugangs-Passwort) erzeugt der Server selbst. Danach MetaMCP und Hermes verbinden.
+Den Rest (Schlüssel, Zugangs-Passwort) erzeugt der Server selbst. Danach MetaMCP und Hermes verbinden. Dazu gehören der [Hermes-Prompt](#-prompt-für-hermes) und, falls MetaMCP den Guard nicht erreicht, der [Netzwerk-Fix](#-netzwerk-problem-lösen).
 
 ➡️ **Anleitung für Einsteiger, jeder Schritt mit „Fertig, wenn“:** [docs/START-HERE.de.md](docs/START-HERE.de.md)
 
@@ -143,7 +143,7 @@ Label `An Hermes`, Hermes holt sie ab. Details: [docs/SETUP.de.md](docs/SETUP.de
 ## 🤖 Prompt für Hermes
 
 Erklärt Hermes, dass er **nur diesen MCP** benutzen soll, dass er **mit Absicht nicht senden** kann, und alle 16 Werkzeuge.
-In Hermes' Gedächtnis oder als Skill ablegen. Nur den Kontonamen (`privat`) anpassen. Als Datei: [hermes/hermes-prompt.de.md](hermes/hermes-prompt.de.md).
+In Hermes' Gedächtnis oder als Skill ablegen. Nur den Kontonamen (`privat`) anpassen. Als Datei zum Herunterladen: [hermes/hermes-prompt.de.md](hermes/hermes-prompt.de.md) · [Raw-Datei](https://raw.githubusercontent.com/oliverhees/hermes-gmail-guard/main/hermes/hermes-prompt.de.md).
 
 <details>
 <summary><b>Prompt anzeigen und kopieren</b></summary>
@@ -230,6 +230,23 @@ Nichts tun, mir kurz sagen, was dir aufgefallen ist, und auf mich warten.
 `````
 
 </details>
+
+## 🔧 Netzwerk-Problem lösen
+
+**Symptom:** In MetaMCP steht beim Gmail-Server **„Connection Error“** oder **0 Werkzeuge**, zum Beispiel nach einem Neu-Deploy des Guards.
+**Ursache:** Gmail Guard und MetaMCP hängen nicht im selben Docker-Netz.
+
+**Fix zum Einfügen** (auf dem Server im Terminal), danach in MetaMCP **Reconnect**:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/oliverhees/hermes-gmail-guard/main/scripts/connect-metamcp.sh | bash
+```
+
+Das Skript findet Guard, MetaMCP und das Netz selbst, hängt **nur den Guard** ein und testet die Leitung (Erwartung: `status 401`). MetaMCP bleibt unangetastet.
+
+- Skript ansehen: [scripts/connect-metamcp.sh](scripts/connect-metamcp.sh)
+- Dauerhaft statt nur bis zum nächsten Deploy: in Coolify beim Guard `METAMCP_NETWORK=<Netzname>` setzen. Den Namen druckt das Skript am Ende aus. Details: [docs/START-HERE.de.md](docs/START-HERE.de.md) → Phase 4.
+- ⚠️ MetaMCP selbst **nicht** per „Connect to Predefined Network“ ins Netz `coolify` hängen. Bei einem Test ging danach der MetaMCP-Login nicht mehr.
 
 ## 🧪 Tests
 

@@ -18,7 +18,7 @@
 
 **🇬🇧 English** · [🇩🇪 Deutsch](README.de.md)
 
-[Quickstart](#-quickstart) · [Whole mailbox](#-manage-the-whole-mailbox) · [How it works](#-how-it-works) · [Security model](#️-security-model) · [Easy guide](docs/START-HERE.md) · [License](#-license)
+[Quickstart](#-quickstart) · [Whole mailbox](#-manage-the-whole-mailbox) · [Hermes prompt](#-prompt-for-hermes) · [Network fix](#-fix-the-network-problem) · [How it works](#-how-it-works) · [Security model](#️-security-model) · [Easy guide](docs/START-HERE.md) · [License](#-license)
 
 </div>
 
@@ -112,7 +112,7 @@ tool, Hermes can only edit **its own** drafts, max. 20 recipients per draft.
 | 2️⃣ | In Coolify start the repo with `docker-compose.coolify.yml`, enter 3 values | Coolify |
 | 3️⃣ | In the Coolify terminal run `python -m app.connect`, open the link, click "Allow" | Coolify + browser |
 
-The server generates the rest (keys, access password) itself. Then connect MetaMCP and Hermes.
+The server generates the rest (keys, access password) itself. Then connect MetaMCP and Hermes. That includes the [Hermes prompt](#-prompt-for-hermes) and, if MetaMCP can't reach the guard, the [network fix](#-fix-the-network-problem).
 
 ➡️ **Beginner guide, every step with "Done when":** [docs/START-HERE.md](docs/START-HERE.md)
 
@@ -139,7 +139,7 @@ No separate mailbox needed: forward to **`you+hermes@gmail.com`**, a Gmail filte
 ## 🤖 Prompt for Hermes
 
 Tells Hermes to use **only this MCP**, that it **cannot send on purpose**, and explains all 16 tools.
-Put it into Hermes' memory or a skill. Adjust only the account name (`privat`). As a file: [hermes/hermes-prompt.md](hermes/hermes-prompt.md).
+Put it into Hermes' memory or a skill. Adjust only the account name (`privat`). As a file to download: [hermes/hermes-prompt.md](hermes/hermes-prompt.md) · [raw file](https://raw.githubusercontent.com/oliverhees/hermes-gmail-guard/main/hermes/hermes-prompt.md).
 
 <details>
 <summary><b>Show and copy the prompt</b></summary>
@@ -226,6 +226,23 @@ Do nothing, tell me briefly what you noticed, and wait for me.
 `````
 
 </details>
+
+## 🔧 Fix the network problem
+
+**Symptom:** MetaMCP shows **"Connection Error"** or **0 tools** for the Gmail server, for example after a redeploy of the guard.
+**Cause:** Gmail Guard and MetaMCP are not in the same Docker network.
+
+**Paste-and-run fix** (in the server terminal), then click **Reconnect** in MetaMCP:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/oliverhees/hermes-gmail-guard/main/scripts/connect-metamcp.sh | bash
+```
+
+The script finds guard, MetaMCP and the network by itself, attaches **only the guard** and tests the line (expected: `status 401`). MetaMCP stays untouched.
+
+- View the script: [scripts/connect-metamcp.sh](scripts/connect-metamcp.sh)
+- Permanent instead of lasting only until the next deploy: in Coolify set `METAMCP_NETWORK=<network name>` on the guard. The script prints the name at the end. Details: [docs/START-HERE.md](docs/START-HERE.md) → phase 4.
+- ⚠️ Do **not** attach MetaMCP itself to the `coolify` network via "Connect to Predefined Network". In one test the MetaMCP login stopped working afterwards.
 
 ## 🧪 Tests
 
