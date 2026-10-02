@@ -105,6 +105,17 @@ Das ist der längste Teil. Danach wird es leicht.
    ```
    → kopiere das **MetaMCP-Bearer-Token**
 2. **Guard und MetaMCP müssen im gleichen Docker-Netz sein.** Dafür tritt der Guard dem Netz von MetaMCP bei (MetaMCP selbst bleibt unangetastet):
+
+   **⚡ Schnellweg, nur Kopieren und Einfügen** (auf dem Server, als Terminal-Befehl):
+   ```
+   curl -fsSL https://raw.githubusercontent.com/oliverhees/hermes-gmail-guard/main/scripts/connect-metamcp.sh | bash
+   ```
+   Das Skript findet Guard, MetaMCP und das Netz selbst, hängt den Guard ein und testet die Leitung (Erwartung: `status 401`). MetaMCP bleibt unangetastet.
+   Wer nichts aus dem Netz ausführen will: Inhalt von [`scripts/connect-metamcp.sh`](../scripts/connect-metamcp.sh) öffnen, lesen und einfügen.
+   Danach in MetaMCP **Reconnect** klicken.
+   ⚠️ Das hält nur bis zum nächsten Deploy des Guards. Dauerhaft ist die Variable `METAMCP_NETWORK` (nächster Schritt).
+
+   **Dauerhaft** (von Hand):
    - Auf dem Server den Netznamen von MetaMCP herausfinden:
      ```
      docker ps --format '{{.Names}}' | grep -i app-      # MetaMCP-Container suchen
@@ -183,7 +194,7 @@ Das ist der längste Teil. Danach wird es leicht.
 | „Kein Refresh-Token“ | [myaccount.google.com/permissions](https://myaccount.google.com/permissions) → App entfernen → nochmal verbinden |
 | Browser zeigt nach dem Erlauben `Zugriff blockiert` | Ist deine Adresse unter **Testnutzer** eingetragen? (Phase 1, Schritt 5) |
 | Das Coolify-Terminal geht nicht | Auf dem Server `docker exec -it <Name> sh` benutzen (siehe Phase 3) |
-| MetaMCP: „Connection Error“ | Guard und MetaMCP nicht im selben Netz (Phase 4, Schritt 2). Test: `docker exec <MetaMCP-Container> node -e "fetch('http://gmail-guard:8000/mcp',{method:'POST'}).then(r=>console.log(r.status))"` muss `401` zeigen |
+| MetaMCP: „Connection Error“ (auch nach einem Neu-Deploy) | **Einfügen und fertig:** `curl -fsSL https://raw.githubusercontent.com/oliverhees/hermes-gmail-guard/main/scripts/connect-metamcp.sh \| bash`, dann in MetaMCP **Reconnect**. Ursache: Guard und MetaMCP nicht im selben Netz (Phase 4, Schritt 2). Test: `docker exec <MetaMCP-Container> node -e "fetch('http://gmail-guard:8000/mcp',{method:'POST'}).then(r=>console.log(r.status))"` muss `401` zeigen |
 | Deploy: „network … not found“ | `METAMCP_NETWORK` falsch geschrieben. Netznamen prüfen mit `docker network ls` |
 | Zweites Konto | `python -m app.connect --name firma` |
 

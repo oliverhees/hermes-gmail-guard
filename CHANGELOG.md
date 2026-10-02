@@ -3,6 +3,8 @@
 ## Unreleased
 
 - **Easy start / Einfacher Start:** `scripts/setup.py` assistant (asks questions, generates keys, connects Gmail, writes env files); new beginner guide `docs/START-HERE(.de).md` with a local-vs-server decision. / Setup-Assistent und neue Einsteiger-Anleitung mit Entscheidung lokal oder Server.
+- **Netzwerk-Workaround / network workaround:** `scripts/connect-metamcp.sh` attaches the guard to MetaMCP's Docker network (auto-detects containers, tests the line); the guard also joins it permanently via `METAMCP_NETWORK`. / Skript hängt den Guard ins MetaMCP-Netz.
+- **Hermes-Prompt / Hermes prompt:** `hermes/hermes-prompt(.de).md` (only this MCP, no sending, all 16 tools), also embedded in the README.
 - **Login im Container / login inside the container:** `python -m app.connect` (link → allow → paste address); the server generates its own keys and stores them in a volume; new accounts are picked up without restart. Coolify needs only `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GUARD_MODE`. **Untested against real Google/Coolify/Docker.**
 - **Telegram bot optional** (default: send in Gmail yourself); without it the bulk brake refuses instead of asking.
 - **Coolify:** `docker-compose.coolify.yml`; Gmail accounts can now come from the environment variables `GUARD_ACCOUNTS` / `BOT_ACCOUNTS` instead of files. **Untested against a real Coolify.** / Gmail-Zugänge per Umgebungsvariable statt Dateien. Nicht gegen echtes Coolify getestet.
