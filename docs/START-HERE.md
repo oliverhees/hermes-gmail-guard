@@ -95,9 +95,11 @@ This is the longest part. It gets easy afterwards.
 ```bash
 git clone https://github.com/oliverhees/hermes-gmail-guard.git
 cd hermes-gmail-guard
-pip install -r scripts/requirements.txt
-python scripts/setup.py
+python start.py
 ```
+
+> 🪟🍎🐧 **Same command on Windows, Mac and Linux.** On Mac/Linux it is usually `python3 start.py`.
+> The first time it creates its own Python environment (about 1 minute). Nothing is changed on your system.
 
 The assistant **asks you everything** and generates all keys itself:
 

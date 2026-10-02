@@ -114,8 +114,7 @@ tool, Hermes can only edit **its own** drafts, max. 20 recipients per draft.
 ```bash
 git clone https://github.com/oliverhees/hermes-gmail-guard.git
 cd hermes-gmail-guard
-pip install -r scripts/requirements.txt
-python scripts/setup.py
+python start.py        # Mac/Linux: python3 start.py
 ```
 
 ➡️ **Beginner guide, every step with a checkbox:** [docs/START-HERE.md](docs/START-HERE.md)

@@ -118,8 +118,7 @@ pro Entwurf sind maximal 20 Empfänger erlaubt.
 ```bash
 git clone https://github.com/oliverhees/hermes-gmail-guard.git
 cd hermes-gmail-guard
-pip install -r scripts/requirements.txt
-python scripts/setup.py
+python start.py        # Mac/Linux: python3 start.py
 ```
 
 ➡️ **Anleitung für Einsteiger, jeder Schritt mit Haken:** [docs/START-HERE.de.md](docs/START-HERE.de.md)
