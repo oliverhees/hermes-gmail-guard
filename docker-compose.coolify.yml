@@ -4,7 +4,7 @@
 # und GUARD_MODE (read | organize | full). Das Gmail-Konto verbindest du danach im Terminal des Containers:
 #   python -m app.connect
 #
-# Verbindung zu MetaMCP: Beide Dienste hängen im Coolify-Netz "coolify".
+# Verbindung zu MetaMCP: Der Guard tritt dem Netz von MetaMCP bei (Variable METAMCP_NETWORK).
 # Als URL in MetaMCP:  http://gmail-guard:8000/mcp
 # ACHTUNG: Hermes darf KEINEN Zugang zu Coolify haben (siehe docs/START-HERE.de.md).
 
@@ -40,7 +40,7 @@ services:
       - guard-data:/data
     networks:
       default:
-      coolify:
+      metamcp:
         aliases: [gmail-guard]
 
 volumes:
@@ -48,5 +48,8 @@ volumes:
   guard-data:
 
 networks:
-  coolify:
+  # Das Netz, in dem dein MetaMCP hängt (Coolify nennt es wie die MetaMCP-Ressource-ID).
+  # In Coolify "Environment Variables": METAMCP_NETWORK=<Netzname>. Siehe docs/START-HERE.de.md, Phase 4.
+  metamcp:
     external: true
+    name: ${METAMCP_NETWORK:-coolify}
