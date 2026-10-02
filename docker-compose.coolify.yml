@@ -1,7 +1,8 @@
 # Für Coolify (einfach, OHNE Telegram-Bot – du sendest selbst in Gmail).
 # Resource → Docker Compose → diese Datei auswählen.
-# Alle Werte kommen aus den Coolify-"Environment Variables" (Inhalt von out/settings.env,
-# erzeugt von scripts/setup.py). Es werden keine Dateien auf dem Server gebraucht.
+# Nötig in Coolify "Environment Variables": GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (aus der client_secret…json)
+# und GUARD_MODE (read | organize | full). Das Gmail-Konto verbindest du danach im Terminal des Containers:
+#   python -m app.connect
 #
 # Verbindung zu MetaMCP: Beide Dienste hängen im Coolify-Netz "coolify".
 # Als URL in MetaMCP:  http://gmail-guard:8000/mcp
@@ -23,9 +24,12 @@ services:
     environment:
       - GUARD_MODE=${GUARD_MODE:-read}
       - APPROVAL_BOT=${APPROVAL_BOT:-0}
-      - GUARD_TOKEN_KEY=${GUARD_TOKEN_KEY}
-      - MCP_BEARER_TOKEN=${MCP_BEARER_TOKEN}
-      - GUARD_ACCOUNTS=${GUARD_ACCOUNTS}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # optional: fehlen sie, erzeugt der Server sie selbst und merkt sie im Volume "guard-data"
+      - GUARD_TOKEN_KEY=${GUARD_TOKEN_KEY:-}
+      - MCP_BEARER_TOKEN=${MCP_BEARER_TOKEN:-}
+      - GUARD_ACCOUNTS=${GUARD_ACCOUNTS:-}
       - TZ=${TZ:-Europe/Berlin}
       - BRAKE_TRASH=${BRAKE_TRASH:-20}
       - BRAKE_SPAM=${BRAKE_SPAM:-20}
@@ -33,6 +37,7 @@ services:
       - DAILY_TRASH_LIMIT=${DAILY_TRASH_LIMIT:-100}
     volumes:
       - shared-db:/shared
+      - guard-data:/data
     networks:
       default:
       coolify:
@@ -40,6 +45,7 @@ services:
 
 volumes:
   shared-db:
+  guard-data:
 
 networks:
   coolify:

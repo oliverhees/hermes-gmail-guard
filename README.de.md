@@ -107,23 +107,19 @@ pro Entwurf sind maximal 20 Empfänger erlaubt.
 
 ## 🚀 Schnellstart
 
-**3 Schritte. Der Assistent erledigt den Rest.**
+**3 Schritte. Du brauchst nur einen Browser und Coolify.**
 
 | | Was | Wo |
 |---|---|---|
-| 1️⃣ | Google-Zugang anlegen (Klick-Anleitung); Telegram-Bot nur optional | Browser |
-| 2️⃣ | `python scripts/setup.py` – beantwortet Fragen, erzeugt alle Schlüssel, verbindet Gmail | dein Rechner |
-| 3️⃣ | Starten: **Coolify** (Docker Compose einfügen) **oder** `docker compose -f docker-compose.local.yml up -d` | Server **oder** dein Rechner |
+| 1️⃣ | Google-Zugang anlegen (Klick-Anleitung, ca. 15 Min) | Browser |
+| 2️⃣ | In Coolify das Repo mit `docker-compose.coolify.yml` starten, 3 Werte eintragen | Coolify |
+| 3️⃣ | Im Coolify-Terminal `python -m app.connect`, Link öffnen, „Erlauben“ | Coolify + Browser |
 
-```bash
-git clone https://github.com/oliverhees/hermes-gmail-guard.git
-cd hermes-gmail-guard
-python start.py        # Mac/Linux: python3 start.py
-```
+Den Rest (Schlüssel, Zugangs-Passwort) erzeugt der Server selbst. Danach MetaMCP und Hermes verbinden.
 
-➡️ **Anleitung für Einsteiger, jeder Schritt mit Haken:** [docs/START-HERE.de.md](docs/START-HERE.de.md)
+➡️ **Anleitung für Einsteiger, jeder Schritt mit „Fertig, wenn“:** [docs/START-HERE.de.md](docs/START-HERE.de.md)
 
-**Muss das auf einen Server?** Nein. Gmail Guard läuft auch auf deinem Rechner, aber nur dann, wenn der Rechner an ist. Auf einem Server (z.B. mit Coolify) läuft es dauerhaft und ist sicherer. **Hermes selbst darf lokal bleiben.**
+**Warum auf einem Server?** Damit der Google-Schlüssel auf einer anderen Maschine liegt als Hermes. Läuft beides auf einem Rechner, kommt Hermes immer an den Schlüssel. **Hermes selbst darf bleiben, wo er ist.**
 
 ## 📬 Ganzes Postfach verwalten
 

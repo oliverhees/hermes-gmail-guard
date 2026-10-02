@@ -20,7 +20,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from mcp.server.fastmcp import FastMCP
 
-from common import store
+from common import secrets_store, store
 from common.textutil import clip, html_to_text, untrusted
 from common.tokens import load_accounts
 
@@ -39,6 +39,7 @@ LEVEL = LEVELS[MODE]
 # Ohne Freigabe-Bot gibt es keinen Sende-Weg und keine Masse-Freigabe: Der Besitzer sendet selbst in Gmail.
 APPROVAL_BOT = os.environ.get("APPROVAL_BOT", "1").strip() == "1"
 
+secrets_store.ensure()  # fehlende Schlüssel selbst erzeugen und im Volume merken
 BEARER = os.environ.get("MCP_BEARER_TOKEN", "").strip()
 if len(BEARER) < 32:
     raise SystemExit("MCP_BEARER_TOKEN fehlt oder ist zu kurz (min. 32 Zeichen).")
@@ -94,8 +95,15 @@ def _check_paused():
         raise RuntimeError("NOT-AUS aktiv: Der Besitzer hat gmail-guard pausiert. Keine Aktionen möglich.")
 
 
+def _refresh_accounts():
+    """Neu verbundene Konten (python -m app.connect) ohne Neustart übernehmen."""
+    ACCOUNTS.update(load_accounts(TOKENS_DIR, "GUARD_TOKEN_KEY", "GUARD_ACCOUNTS"))
+
+
 def _svc(account: str, need_modify=False):
     _check_paused()
+    if account not in ACCOUNTS:
+        _refresh_accounts()
     acc = ACCOUNTS.get(account)
     if not acc:
         raise ValueError(f"Unbekanntes Konto '{account}'. Verfügbar: {', '.join(ACCOUNTS) or 'keine'}")
@@ -330,6 +338,7 @@ def _label_draft(svc, message_id):
 def list_accounts() -> dict:
     """Zeigt alle verbundenen Gmail-Konten (Kurzname, Adresse, Zugriffsart) und den aktiven Modus."""
     _check_paused()
+    _refresh_accounts()
     return {"modus": MODE, "konten": [
         {"konto": a.name, "email": a.email, "zugriff": "lesen+aufräumen" if a.can_modify else "nur lesen",
          "postfach_link": _gmail_url(a, "inbox")}

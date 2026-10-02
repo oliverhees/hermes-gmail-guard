@@ -103,23 +103,19 @@ tool, Hermes can only edit **its own** drafts, max. 20 recipients per draft.
 
 ## 🚀 Quickstart
 
-**3 steps. The assistant does the rest.**
+**3 steps. You only need a browser and Coolify.**
 
 | | What | Where |
 |---|---|---|
-| 1️⃣ | Create Google access (click-by-click guide); Telegram bot is optional | browser |
-| 2️⃣ | `python scripts/setup.py` – asks questions, generates all keys, connects Gmail | your computer |
-| 3️⃣ | Start: **Coolify** (paste the Docker Compose) **or** `docker compose -f docker-compose.local.yml up -d` | server **or** your computer |
+| 1️⃣ | Create Google access (click-by-click guide, about 15 min) | browser |
+| 2️⃣ | In Coolify start the repo with `docker-compose.coolify.yml`, enter 3 values | Coolify |
+| 3️⃣ | In the Coolify terminal run `python -m app.connect`, open the link, click "Allow" | Coolify + browser |
 
-```bash
-git clone https://github.com/oliverhees/hermes-gmail-guard.git
-cd hermes-gmail-guard
-python start.py        # Mac/Linux: python3 start.py
-```
+The server generates the rest (keys, access password) itself. Then connect MetaMCP and Hermes.
 
-➡️ **Beginner guide, every step with a checkbox:** [docs/START-HERE.md](docs/START-HERE.md)
+➡️ **Beginner guide, every step with "Done when":** [docs/START-HERE.md](docs/START-HERE.md)
 
-**Does it have to run on a server?** No. Gmail Guard also runs on your own computer, but only while the computer is on. On a server (e.g. with Coolify) it runs permanently and is safer. **Hermes itself can stay local.**
+**Why on a server?** So the Google key lives on a different machine than Hermes. If both run on one computer, Hermes can always reach the key. **Hermes itself can stay where it is.**
 
 ## 📬 Manage the whole mailbox
 
