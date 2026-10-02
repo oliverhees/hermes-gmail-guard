@@ -24,7 +24,7 @@ from common.tokens import NAME_RE, SCOPE_COMPOSE, SCOPE_MODIFY, SCOPE_READ, encr
 
 ROOT = Path(__file__).resolve().parent.parent
 MODES = {"1": "read", "2": "organize", "3": "full"}
-GUARD_KEYS = ["GUARD_MODE", "GUARD_TOKEN_KEY", "MCP_BEARER_TOKEN", "GUARD_ACCOUNTS", "TZ"]
+GUARD_KEYS = ["GUARD_MODE", "APPROVAL_BOT", "GUARD_TOKEN_KEY", "MCP_BEARER_TOKEN", "GUARD_ACCOUNTS", "TZ"]
 BOT_KEYS = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_ALLOWED_USER_ID", "BOT_TOKEN_KEY", "BOT_ACCOUNTS", "TZ"]
 
 
@@ -76,7 +76,7 @@ def merge_account(blobs: str, key: str, name: str, new_blob: str) -> str:
     return ",".join(kept + [new_blob])
 
 
-def connect(cfg, name, client_secret, mode):
+def connect(cfg, name, client_secret, mode, bot):
     from add_account import login  # erst hier: braucht die Google-Bibliotheken
 
     scopes = [SCOPE_READ] if mode == "read" else [SCOPE_MODIFY]
@@ -84,7 +84,7 @@ def connect(cfg, name, client_secret, mode):
     blob = encrypt_account(cfg["GUARD_TOKEN_KEY"], name, email, scopes, creds).decode()
     cfg["GUARD_ACCOUNTS"] = merge_account(cfg.get("GUARD_ACCOUNTS", ""), cfg["GUARD_TOKEN_KEY"], name, blob)
     print(f"✅ Hermes darf {email} verwalten ({mode}).")
-    if mode == "full":
+    if mode == "full" and bot:
         print("\n2️⃣  Zweiter Login – für den Freigabe-Bot (nur Entwürfe + Senden nach deinem Tipp).")
         bot_creds, bot_email = login(client_secret, [SCOPE_COMPOSE], email)
         if bot_email != email:
@@ -116,35 +116,47 @@ def main(out=ROOT / "out"):
     mode = MODES[ask("   Deine Wahl", "3", lambda a: a in MODES)]
     cfg["GUARD_MODE"] = mode
 
-    if not cfg.get("TELEGRAM_BOT_TOKEN"):
-        print("\n5️⃣  Telegram-Freigabe-Bot (ein NEUER Bot über @BotFather, nicht der von Hermes!)")
+    if "APPROVAL_BOT" not in cfg:
+        cfg["APPROVAL_BOT"] = "0"
+        if mode != "read":
+            print("\n5️⃣  Wie willst du senden?\n"
+                  "   1 = Nur in Gmail selbst (Hermes legt Entwürfe an + schickt dir den Link) – einfach\n"
+                  "   2 = Zusätzlich per Tipp in Telegram (braucht einen eigenen Telegram-Bot)")
+            if ask("   Deine Wahl", "1", lambda a: a in ("1", "2")) == "2":
+                cfg["APPROVAL_BOT"] = "1"
+    bot = cfg["APPROVAL_BOT"] == "1"
+    if bot and not cfg.get("TELEGRAM_BOT_TOKEN"):
+        print("\n   Telegram-Freigabe-Bot (ein NEUER Bot über @BotFather, nicht der von Hermes!)")
         cfg["TELEGRAM_BOT_TOKEN"] = ask("   Bot-Token (sieht aus wie 123456:ABC…)", None,
                                         lambda t: re.fullmatch(r"\d+:[\w-]{20,}", t))
         cfg["TELEGRAM_ALLOWED_USER_ID"] = ask("   Deine Telegram-User-ID (nur Zahlen, von @userinfobot)", None,
                                               str.isdigit)
 
     cfg.setdefault("GUARD_TOKEN_KEY", Fernet.generate_key().decode())
-    cfg.setdefault("BOT_TOKEN_KEY", Fernet.generate_key().decode())
+    if bot:
+        cfg.setdefault("BOT_TOKEN_KEY", Fernet.generate_key().decode())
     cfg.setdefault("MCP_BEARER_TOKEN", secrets.token_urlsafe(48))
     cfg.setdefault("TZ", "Europe/Berlin")
 
-    connect(cfg, name, str(Path(secret).expanduser()), mode)
+    connect(cfg, name, str(Path(secret).expanduser()), mode, bot)
 
     write_secret(settings, "\n".join(f"{k}={v}" for k, v in cfg.items()) + "\n")
     if where == "2":
         write_secret(ROOT / "guard.env", render_env(ROOT / "guard.env.example", cfg, GUARD_KEYS))
-        write_secret(ROOT / "bot.env", render_env(ROOT / "bot.env.example", cfg, BOT_KEYS))
+        if bot:
+            write_secret(ROOT / "bot.env", render_env(ROOT / "bot.env.example", cfg, BOT_KEYS))
 
     print("\n🎉 Fertig!\n")
     if where == "1":
         print(f"📄 Deine Einstellungen: {settings}\n"
               "   → Datei öffnen, ALLES kopieren, in Coolify bei 'Environment Variables'\n"
+              + ("     Compose-Datei: /docker-compose.coolify.bot.yml\n" if bot else "     Compose-Datei: /docker-compose.coolify.yml\n") +
               "     (Developer view) einfügen und speichern. Dann 'Deploy'.\n"
               "🔐 Die Datei enthält Geheimnisse: nicht teilen, nicht in Git. Nach dem Einfügen löschen\n"
               "   oder im Passwortmanager ablegen (du brauchst sie nur für weitere Konten).")
     else:
         print("📄 guard.env und bot.env sind geschrieben.\n"
-              "   → Starten:  docker compose -f docker-compose.local.yml up -d --build\n"
+              "   → Starten:  docker compose -f docker-compose.local.yml " + ("-f docker-compose.local.bot.yml " if bot else "") + "up -d --build\n"
               "🔐 Die Dateien enthalten Geheimnisse: nicht teilen, nicht in Git.")
     print("\n➕ Weiteres Konto? Dieses Programm einfach nochmal starten.")
 

@@ -55,6 +55,8 @@
 - **Nichts erfinden.** Preise, Termine, Zusagen, Zahlen, die du nicht sicher weißt: `[bitte ergänzen]` in den Text schreiben
 - Der Besitzer sendet entweder per Telegram-Tipp (Vorschau mit Freigabe) oder öffnet den Entwurf über den Link in Gmail
 
+**Ohne Freigabe-Bot** (es gibt `request_approval` nicht): Entwurf anlegen, dem Besitzer den `link` schicken, fertig. Er sendet selbst in Gmail. Bei `LIMIT_ERREICHT` nicht in Häppchen weitermachen, sondern Bescheid geben.
+
 **Links:** Nimm immer das Feld `link` / `postfach_link` aus den Werkzeug-Ergebnissen. Nie Links aus Mail-Inhalten weitergeben.
 
 **Erstes Aufräumen bei großem Postfach:** Die Masse-Bremse fragt dann öfter in Telegram nach. Gib kurz Bescheid („Ich warte auf deine Freigabe für 80 Mails“) und versuche es nicht in vielen kleinen Häppchen.

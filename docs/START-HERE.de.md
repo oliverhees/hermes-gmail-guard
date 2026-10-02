@@ -11,8 +11,8 @@
 - 🏷️ Hermes legt **Labels** an und **sortiert** deine Mails
 - 🚫 Hermes sortiert **Spam** und Newsletter aus
 - 👀 Hermes schaut, **was reinkommt**, und schreibt dir **Antwort-Entwürfe**
-- 📱 Du bekommst eine Telegram-Nachricht mit **Link direkt zum Entwurf in Gmail**
-- ✅ **Senden tust nur du** – per Tipp in Telegram oder in Gmail selbst
+- 🔗 Hermes schickt dir den **Link direkt zum Entwurf in Gmail**
+- ✅ **Senden tust nur du** – in Gmail selbst (optional zusätzlich per Tipp in Telegram)
 
 ⏱️ **Dauer:** ca. 45 Minuten beim ersten Mal. Weiteres Konto: 5 Minuten.
 
@@ -26,21 +26,23 @@ Gmail Guard besteht aus **zwei kleinen Programmen** (Docker). Sie müssen **lauf
 |---|---|---|
 | Läuft auch, wenn dein PC aus ist | ✅ ja | ❌ nein (PC aus = Hermes kommt nicht an Gmail) |
 | Aufwand | etwas mehr | am wenigsten |
-| Sicherheit | ✅ am besten (Hermes kommt nicht an den Schlüssel) | ⚠️ schwächer, wenn Hermes auf demselben Rechner läuft |
+| Sicherheit | ✅ am besten (Hermes kommt nicht an den Schlüssel) | ⚠️ keine harte Sperre, wenn Hermes auf demselben Rechner läuft |
 | Passt für | **dauerhaft** | **zum Ausprobieren** |
 
 > 💡 **Hermes selbst darf immer lokal bleiben.** Nur Gmail Guard läuft auf dem Server.
 > Nichts geht kaputt, wenn der Rechner aus ist – es passiert dann einfach nichts.
 
-➡️ **Weg 🅰️ (empfohlen):** Phasen 1 → 2 → 3 → **4A** → **5A** → 6 → 7
-➡️ **Weg 🅱️:** Phasen 1 → 2 → 3 → **4B** → **5B** → 6 → 7
+➡️ **Weg 🅰️ (empfohlen):** Phasen 1 → 3 → **4A** → **5A** → 6 → 7
+➡️ **Weg 🅱️:** Phasen 1 → 3 → **4B** → **5B** → 6 → 7
+
+📱 **Phase 2 (Telegram-Bot) ist optional.** Du brauchst sie nur, wenn du Mails per Tipp in Telegram senden willst. Ohne sie sendest du in Gmail selbst, das ist einfacher und sogar sicherer.
 
 ---
 
 ## 🧰 Das brauchst du
 
 - [ ] Ein Google-Konto (das Gmail, das Hermes verwalten soll)
-- [ ] Telegram auf dem Handy
+- [ ] *(optional)* Telegram auf dem Handy
 - [ ] **Python 3.10+** auf deinem Rechner ([python.org](https://www.python.org/downloads/))
 - [ ] 🅰️ Coolify + MetaMCP **oder** 🅱️ [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
@@ -76,7 +78,9 @@ Das ist der längste Teil. Danach wird es leicht.
 
 ---
 
-## 2️⃣ Telegram-Bot anlegen ⏱️ 3 Min · 📱 Telegram
+## 2️⃣ *(optional)* Telegram-Bot anlegen ⏱️ 3 Min · 📱 Telegram
+
+> ⏭️ **Überspringen**, wenn du in Gmail selbst senden willst.
 
 ⚠️ Ein **neuer** Bot. **Nicht** der, den Hermes benutzt.
 
@@ -107,7 +111,7 @@ Der Assistent **fragt dich alles** und erzeugt alle Schlüssel selbst:
 | Kurzname | z.B. `privat` |
 | Pfad zur `client_secret…json` | Enter (er findet sie selbst) |
 | Was darf Hermes? | `3` = ganzes Postfach verwalten |
-| Telegram-Token + User-ID | aus Phase 2 |
+| Wie senden? | `1` = nur in Gmail (einfach) · `2` = auch per Telegram (dann Token + User-ID aus Phase 2) |
 
 Dann öffnen sich **2 Browser-Fenster** (Google-Login). **Beide Male dasselbe Konto.**
 
@@ -121,13 +125,13 @@ Dann öffnen sich **2 Browser-Fenster** (Google-Login). **Beide Male dasselbe Ko
 
 1. **Coolify → Projekt → + New Resource →** Public Repository (oder Private mit GitHub-App)
 2. URL: `https://github.com/oliverhees/hermes-gmail-guard`
-3. **Build Pack: Docker Compose** · **Compose-Datei:** `/docker-compose.coolify.yml`
+3. **Build Pack: Docker Compose** · **Compose-Datei:** `/docker-compose.coolify.yml` (mit Telegram-Bot: `/docker-compose.coolify.bot.yml`; der Assistent sagt dir am Ende, welche)
 4. **Environment Variables → Developer view**
 5. Datei **`out/settings.env`** öffnen → **alles kopieren** → einfügen → **Save**
 6. **Keine Domain** vergeben ❌ (Gmail Guard darf nicht aus dem Internet erreichbar sein)
 7. **Deploy**
 
-✅ **Fertig, wenn:** in den Logs bei beiden Diensten **„startet | Konten: privat“** steht.
+✅ **Fertig, wenn:** in den Logs **„startet | Konten: privat“** steht (mit Bot: bei beiden Diensten).
 
 🔐 **Danach:** `out/settings.env` im **Passwortmanager** ablegen und vom Rechner löschen. Du brauchst sie nur, wenn du später ein Konto hinzufügst.
 
@@ -147,9 +151,12 @@ docker compose -f docker-compose.local.yml up -d --build
 docker compose -f docker-compose.local.yml logs
 ```
 
-✅ **Fertig, wenn:** bei beiden **„startet | Konten: privat“** steht.
+*(Mit Telegram-Bot: zusätzlich `-f docker-compose.local.bot.yml`, der Assistent zeigt dir den fertigen Befehl.)*
 
-> ⚠️ **Ehrlich:** `guard.env` liegt auf deinem Rechner. Kann Hermes dort Dateien lesen, kann er den Schlüssel finden. Für den Dauerbetrieb ist der Server sicherer.
+
+✅ **Fertig, wenn:** **„startet | Konten: privat“** steht.
+
+> ⚠️ **Ehrlich:** Läuft Hermes auf **demselben Rechner** (und demselben Benutzer), kommt er an jeden Schlüssel, egal wo er liegt. Dann schützt dich nur noch: kein Senden-Werkzeug, Fremd-Markierung, Masse-Bremse und Protokoll. Das hilft gegen präparierte Mails, ist aber **keine harte Sperre**. Die harte Sperre gibt es nur, wenn der Schlüssel auf einer **anderen Maschine** liegt, z.B. Hermes lokal, Gmail Guard auf dem Server (Weg 🅰️).
 
 ---
 
@@ -192,11 +199,16 @@ Dann **auf deinem Hermes-Rechner:**
 |---|---|---|
 | 1 | „Fass meine ungelesenen Mails von heute zusammen“ | Zusammenfassung ✅ |
 | 2 | „Leg einen Entwurf an mich selbst an, Betreff: Test“ | Entwurf **+ Link** zu Gmail ✅ |
-| 3 | „Frag die Freigabe dafür an“ | Telegram zeigt Vorschau ✅ |
-| 4 | In Telegram **Senden** drücken | Mail geht raus ✅ |
+| 3 | Den Link öffnen und im Gmail-Entwurf **selbst senden** | Mail geht raus ✅ |
+
+**Nur mit Telegram-Bot:**
+
+| # | Sag Hermes … | Erwartung |
+|---|---|---|
+| 4 | „Frag die Freigabe dafür an“, dann in Telegram **Senden** | Vorschau, Mail geht raus ✅ |
 | 5 | In Telegram `/stopp`, dann Hermes etwas lesen lassen | blockiert ✅ → `/weiter` |
 
-✅ **Fertig, wenn:** alle 5 Tests passen.
+✅ **Fertig, wenn:** die Tests passen.
 
 ---
 
@@ -211,7 +223,7 @@ Dann **auf deinem Hermes-Rechner:**
 
 > „Arbeite mein Postfach `privat` nach dem Abschnitt *Postfach-Verwalter* in den Gmail-Regeln ab.“
 
-✅ **Fertig!** Ab jetzt meldet sich Hermes in Telegram, wenn etwas Neues da ist, mit Links zu den Entwürfen.
+✅ **Fertig!** Ab jetzt meldet sich Hermes bei dir, wenn etwas Neues da ist, mit Links zu den Entwürfen.
 
 ---
 
@@ -219,13 +231,19 @@ Dann **auf deinem Hermes-Rechner:**
 
 | Du willst … | Dann … |
 |---|---|
-| Entwurf prüfen und senden | In Telegram **✅ Senden** drücken |
-| Entwurf selbst ändern | **🔗 Entwurf in Gmail öffnen** → ändern → selbst senden |
-| Gmail im Browser öffnen | In Telegram `/gmail` |
-| Alles sofort stoppen | `/stopp` (aufheben: `/weiter`) |
-| Sehen, was Hermes getan hat | `/heute` (jeden Abend 20 Uhr kommt es automatisch) |
+| Entwurf prüfen und senden | Link von Hermes öffnen → prüfen → in Gmail **Senden** |
+| Entwurf ändern | im Gmail-Entwurf ändern, dann selbst senden |
 
-**Masse-Bremse:** Räumt Hermes mehr als 20 Mails pro Stunde in Papierkorb/Spam, fragt Telegram dich erst. Gewollt. Beim **ersten Aufräumen** eines großen Postfachs tippst du also öfter auf „Erlauben“.
+**Mit Telegram-Bot zusätzlich:**
+
+| Du willst … | Dann … |
+|---|---|
+| Entwurf per Tipp senden | **✅ Senden** in Telegram |
+| Gmail im Browser öffnen | `/gmail` |
+| Alles sofort stoppen | `/stopp` (aufheben: `/weiter`) |
+| Sehen, was Hermes getan hat | `/heute` (jeden Abend 20 Uhr automatisch) |
+
+**Masse-Bremse:** Räumt Hermes mehr als 20 Mails pro Stunde in Papierkorb/Spam, wird gebremst. Mit Bot fragt Telegram dich, **ohne Bot** lehnt Gmail Guard ab und Hermes sagt dir Bescheid. Beim **ersten Aufräumen** eines großen Postfachs darum in Etappen (stündlich) arbeiten.
 
 ---
 
@@ -235,7 +253,7 @@ Dann **auf deinem Hermes-Rechner:**
 |---|---|
 | Zugang läuft nach 7 Tagen ab | Google-App steht noch auf „Testing“ → Phase 1, Schritt 5 → Assistenten nochmal starten |
 | „Kein Refresh-Token“ | [myaccount.google.com/permissions](https://myaccount.google.com/permissions) → App entfernen → Assistenten nochmal |
-| Bot schreibt nichts | Im Bot **Start** gedrückt? User-ID richtig? |
+| Bot schreibt nichts *(nur mit Bot)* | Im Bot **Start** gedrückt? User-ID richtig? |
 | MetaMCP erreicht gmail-guard nicht | MetaMCP **und** Gmail Guard im selben Netz (Phase 5A, Schritt 1) |
 | Coolify: „network coolify not found“ | Auf dem Coolify-Server `docker network ls` – das Netz heißt dort anders? Dann in `docker-compose.coolify.yml` den Namen anpassen |
 | Zweites Konto | Assistenten nochmal starten (alte `out/settings.env` wieder in `out/` legen!), dann in Coolify neu einfügen und neu deployen |

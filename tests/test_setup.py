@@ -33,11 +33,11 @@ def run(monkeypatch, tmp_path):
     return go
 
 
-TELEGRAM = ["123456789:AAEhBP0av28sample_token_value_xx", "4242"]
+BOT_YES = ["2", "123456789:AAEhBP0av28sample_token_value_xx", "4242"]   # Senden per Telegram
 
 
 def test_first_run_local_writes_env_files_with_working_accounts(run):
-    d = run(["2", "privat", run.secret, "3"] + TELEGRAM)
+    d = run(["2", "privat", run.secret, "3"] + BOT_YES)
     guard, bot = (d / "guard.env").read_text(), (d / "bot.env").read_text()
     assert "GUARD_MODE=full" in guard and "GUARD_ACCOUNTS=gAAAA" in guard
     assert "TELEGRAM_ALLOWED_USER_ID=4242" in bot and "BOT_ACCOUNTS=gAAAA" in bot
@@ -54,14 +54,14 @@ def test_first_run_local_writes_env_files_with_working_accounts(run):
 
 
 def test_server_mode_writes_only_the_coolify_file(run):
-    d = run(["1", "privat", run.secret, "2"] + TELEGRAM)
+    d = run(["1", "privat", run.secret, "2", "2", "123456789:AAEhBP0av28sample_token_value_xx", "4242"])
     assert not (d / "guard.env").exists()
     env = wizard.read_env(d / "out" / "settings.env")
     assert env["GUARD_MODE"] == "organize" and "BOT_ACCOUNTS" not in env
 
 
 def test_second_run_adds_account_and_keeps_keys(run):
-    d = run(["1", "privat", run.secret, "3"] + TELEGRAM)
+    d = run(["1", "privat", run.secret, "3"] + BOT_YES)
     first = wizard.read_env(d / "out" / "settings.env")
     run(["1", "firma", run.secret, "3"], who="anna")        # kein Telegram-Prompt mehr
     second = wizard.read_env(d / "out" / "settings.env")
@@ -73,6 +73,15 @@ def test_second_run_adds_account_and_keeps_keys(run):
 
 
 def test_reconnecting_same_name_replaces_instead_of_duplicating(run):
-    d = run(["1", "privat", run.secret, "3"] + TELEGRAM)
+    d = run(["1", "privat", run.secret, "3"] + BOT_YES)
     run(["1", "privat", run.secret, "3"])
     assert len(wizard.read_env(d / "out" / "settings.env")["GUARD_ACCOUNTS"].split(",")) == 1
+
+
+def test_default_is_no_bot_send_in_gmail_only(run):
+    d = run(["2", "privat", run.secret, "3", "1"])          # 5: nur in Gmail senden
+    env = wizard.read_env(d / "out" / "settings.env")
+    assert env["APPROVAL_BOT"] == "0"
+    assert "BOT_TOKEN_KEY" not in env and "BOT_ACCOUNTS" not in env and "TELEGRAM_BOT_TOKEN" not in env
+    assert "APPROVAL_BOT=0" in (d / "guard.env").read_text()
+    assert not (d / "bot.env").exists()

@@ -107,7 +107,7 @@ tool, Hermes can only edit **its own** drafts, max. 20 recipients per draft.
 
 | | What | Where |
 |---|---|---|
-| 1️⃣ | Create Google access + Telegram bot (click-by-click guide) | browser, Telegram |
+| 1️⃣ | Create Google access (click-by-click guide); Telegram bot is optional | browser |
 | 2️⃣ | `python scripts/setup.py` – asks questions, generates all keys, connects Gmail | your computer |
 | 3️⃣ | Start: **Coolify** (paste the Docker Compose) **or** `docker compose -f docker-compose.local.yml up -d` | server **or** your computer |
 

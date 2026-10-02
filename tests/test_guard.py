@@ -99,3 +99,14 @@ def test_tools_return_gmail_links(S):
     d = S.create_draft("privat", "kunde@firma.de", "Hi", "Text")
     assert d["link"].startswith("https://mail.google.com/mail/u/oliver@example.com/#drafts?compose=dm")
     assert S.list_hermes_drafts("privat")["entwuerfe"][0]["link"] == d["link"]
+
+
+def test_without_bot_there_is_no_approval_path_and_brake_refuses(S, monkeypatch):
+    names = {t.__name__ for t in S.tools_for(3, bot=False)}
+    assert not names & {"request_approval", "get_approval_status", "execute_bulk_job", "get_bulk_job_status"}
+    assert {"create_draft", "archive", "search_mails"} <= names
+    assert len(S.tools_for(3, bot=True)) == 20 and not any("send" in t.__name__ for t in S.tools_for(3, bot=False))
+    monkeypatch.setattr(S, "APPROVAL_BOT", False)
+    r = S.trash("privat", [f"msg{i:04d}" for i in range(25)])
+    assert r["status"] == "LIMIT_ERREICHT"
+    assert "TRASH" not in S.FAKE.msgs["msg0000"]["labelIds"]       # nichts passiert

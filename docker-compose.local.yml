@@ -1,5 +1,6 @@
 # Alles auf DIESEM Rechner (Docker Desktop reicht).
 # Start:  docker compose -f docker-compose.local.yml up -d --build
+# Mit Telegram-Bot zusätzlich:  -f docker-compose.local.bot.yml
 # Hermes verbindet sich danach mit:  http://localhost:8765/mcp
 # (Läuft Hermes selbst in Docker: http://host.docker.internal:8765/mcp)
 # guard.env + bot.env schreibt:  python scripts/setup.py
@@ -23,14 +24,6 @@ services:
       - shared-db:/shared
     # nur von diesem Rechner aus erreichbar (127.0.0.1), nie aus dem Netzwerk
     ports: ["127.0.0.1:8765:8000"]
-
-  freigabe-bot:
-    <<: *hardening
-    build: { context: ., dockerfile: freigabe-bot/Dockerfile }
-    container_name: freigabe-bot
-    env_file: bot.env
-    volumes:
-      - shared-db:/shared
 
 volumes:
   shared-db:

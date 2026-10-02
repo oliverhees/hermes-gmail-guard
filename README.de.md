@@ -111,7 +111,7 @@ pro Entwurf sind maximal 20 Empfänger erlaubt.
 
 | | Was | Wo |
 |---|---|---|
-| 1️⃣ | Google-Zugang + Telegram-Bot anlegen (Klick-Anleitung) | Browser, Telegram |
+| 1️⃣ | Google-Zugang anlegen (Klick-Anleitung); Telegram-Bot nur optional | Browser |
 | 2️⃣ | `python scripts/setup.py` – beantwortet Fragen, erzeugt alle Schlüssel, verbindet Gmail | dein Rechner |
 | 3️⃣ | Starten: **Coolify** (Docker Compose einfügen) **oder** `docker compose -f docker-compose.local.yml up -d` | Server **oder** dein Rechner |
 

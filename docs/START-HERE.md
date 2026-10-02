@@ -13,8 +13,8 @@
 - 🏷️ Hermes creates **labels** and **sorts** your mail
 - 🚫 Hermes filters out **spam** and newsletters
 - 👀 Hermes watches **what comes in** and writes **reply drafts**
-- 📱 You get a Telegram message with a **link straight to the draft in Gmail**
-- ✅ **Only you send** – with a tap in Telegram or in Gmail itself
+- 🔗 Hermes sends you the **link straight to the draft in Gmail**
+- ✅ **Only you send** – in Gmail itself (optionally also with a tap in Telegram)
 
 ⏱️ **Time:** about 45 minutes the first time. Another account: 5 minutes.
 
@@ -28,21 +28,23 @@ Gmail Guard is **two small programs** (Docker). They must be **running** so that
 |---|---|---|
 | Runs while your PC is off | ✅ yes | ❌ no (PC off = Hermes can't reach Gmail) |
 | Effort | a bit more | least |
-| Security | ✅ best (Hermes can't reach the key) | ⚠️ weaker if Hermes runs on the same machine |
+| Security | ✅ best (Hermes can't reach the key) | ⚠️ no hard lock if Hermes runs on the same machine |
 | Good for | **permanent use** | **trying it out** |
 
 > 💡 **Hermes itself can always stay local.** Only Gmail Guard runs on the server.
 > Nothing breaks when the computer is off – nothing just happens.
 
-➡️ **Path 🅰️ (recommended):** phases 1 → 2 → 3 → **4A** → **5A** → 6 → 7
-➡️ **Path 🅱️:** phases 1 → 2 → 3 → **4B** → **5B** → 6 → 7
+➡️ **Path 🅰️ (recommended):** phases 1 → 3 → **4A** → **5A** → 6 → 7
+➡️ **Path 🅱️:** phases 1 → 3 → **4B** → **5B** → 6 → 7
+
+📱 **Phase 2 (Telegram bot) is optional.** You only need it if you want to send mail with a tap in Telegram. Without it you send in Gmail yourself – simpler and even safer.
 
 ---
 
 ## 🧰 What you need
 
 - [ ] A Google account (the Gmail Hermes should manage)
-- [ ] Telegram on your phone
+- [ ] *(optional)* Telegram on your phone
 - [ ] **Python 3.10+** on your computer ([python.org](https://www.python.org/downloads/))
 - [ ] 🅰️ Coolify + MetaMCP **or** 🅱️ [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
@@ -78,7 +80,9 @@ This is the longest part. It gets easy afterwards.
 
 ---
 
-## 2️⃣ Create the Telegram bot ⏱️ 3 min · 📱 Telegram
+## 2️⃣ *(optional)* Create the Telegram bot ⏱️ 3 min · 📱 Telegram
+
+> ⏭️ **Skip** if you want to send in Gmail yourself.
 
 ⚠️ A **new** bot. **Not** the one Hermes uses.
 
@@ -109,7 +113,7 @@ The assistant **asks you everything** and generates all keys itself:
 | Short name | e.g. `privat` |
 | Path to `client_secret…json` | Enter (it finds it) |
 | What may Hermes do? | `3` = manage the whole mailbox |
-| Telegram token + user ID | from phase 2 |
+| How to send? | `1` = in Gmail only (simple) · `2` = also via Telegram (then token + user ID from phase 2) |
 
 Then **2 browser windows** open (Google login). **Both times the same account.**
 
@@ -123,13 +127,13 @@ Then **2 browser windows** open (Google login). **Both times the same account.**
 
 1. **Coolify → project → + New Resource →** Public Repository (or Private with the GitHub app)
 2. URL: `https://github.com/oliverhees/hermes-gmail-guard`
-3. **Build pack: Docker Compose** · **Compose file:** `/docker-compose.coolify.yml`
+3. **Build pack: Docker Compose** · **Compose file:** `/docker-compose.coolify.yml` (with Telegram bot: `/docker-compose.coolify.bot.yml`; the assistant tells you which at the end)
 4. **Environment Variables → Developer view**
 5. Open **`out/settings.env`** → **copy everything** → paste → **Save**
 6. **Do not assign a domain** ❌ (Gmail Guard must not be reachable from the internet)
 7. **Deploy**
 
-✅ **Done when:** both services log **"startet | Konten: privat"**.
+✅ **Done when:** the log shows **"startet | Konten: privat"** (with bot: for both services).
 
 🔐 **Afterwards:** store `out/settings.env` in your **password manager** and delete it from the computer. You only need it to add an account later.
 
@@ -149,9 +153,12 @@ docker compose -f docker-compose.local.yml up -d --build
 docker compose -f docker-compose.local.yml logs
 ```
 
-✅ **Done when:** both log **"startet | Konten: privat"**.
+*(With Telegram bot: additionally `-f docker-compose.local.bot.yml`; the assistant shows you the finished command.)*
 
-> ⚠️ **Honest note:** `guard.env` lives on your computer. If Hermes can read files there, it can find the key. For permanent use the server is safer.
+
+✅ **Done when:** **"startet | Konten: privat"** appears.
+
+> ⚠️ **Honest note:** If Hermes runs on the **same computer** (and the same user), it can reach any key, wherever it is stored. What still protects you then: no send tool, untrusted-content marking, bulk brake and audit log. That helps against crafted mails but is **not a hard lock**. The hard lock only exists if the key sits on **another machine**, e.g. Hermes local, Gmail Guard on the server (path 🅰️).
 
 ---
 
@@ -194,11 +201,16 @@ Then **on your Hermes machine:**
 |---|---|---|
 | 1 | "Summarize my unread mails from today" | summary ✅ |
 | 2 | "Create a draft to myself, subject: Test" | draft **+ link** to Gmail ✅ |
-| 3 | "Request approval for it" | Telegram shows the preview ✅ |
-| 4 | Press **Senden** (send) in Telegram | mail goes out ✅ |
+| 3 | Open the link and **send it yourself** in the Gmail draft | mail goes out ✅ |
+
+**Only with the Telegram bot:**
+
+| # | Tell Hermes … | Expected |
+|---|---|---|
+| 4 | "Request approval for it", then press **Senden** in Telegram | preview, mail goes out ✅ |
 | 5 | `/stopp` in Telegram, then let Hermes read something | blocked ✅ → `/weiter` |
 
-✅ **Done when:** all 5 tests pass.
+✅ **Done when:** the tests pass.
 
 ---
 
@@ -213,7 +225,7 @@ Then **on your Hermes machine:**
 
 > "Work through my mailbox `privat` following the section *Inbox manager* in the Gmail rules."
 
-✅ **Done!** From now on Hermes pings you in Telegram when there is something new, with links to the drafts.
+✅ **Done!** From now on Hermes tells you when there is something new, with links to the drafts.
 
 ---
 
@@ -221,13 +233,19 @@ Then **on your Hermes machine:**
 
 | You want to … | Then … |
 |---|---|
-| Check and send a draft | Press **✅ Senden** in Telegram |
-| Edit a draft yourself | **🔗 Entwurf in Gmail öffnen** → edit → send yourself |
-| Open Gmail in the browser | `/gmail` in Telegram |
-| Stop everything now | `/stopp` (undo: `/weiter`) |
-| See what Hermes did | `/heute` (arrives automatically every evening at 8 pm) |
+| Check and send a draft | Open Hermes' link → check → **Send** in Gmail |
+| Change a draft | edit it in Gmail, then send it yourself |
 
-**Bulk brake:** If Hermes moves more than 20 mails per hour to trash/spam, Telegram asks you first. That is intended. On the **first clean-up** of a big mailbox you will tap "Erlauben" (allow) more often.
+**With the Telegram bot in addition:**
+
+| You want to … | Then … |
+|---|---|
+| Send a draft with a tap | **✅ Senden** in Telegram |
+| Open Gmail in the browser | `/gmail` |
+| Stop everything now | `/stopp` (undo: `/weiter`) |
+| See what Hermes did | `/heute` (automatic every evening at 8 pm) |
+
+**Bulk brake:** If Hermes moves more than 20 mails per hour to trash/spam it gets slowed down. With the bot Telegram asks you; **without the bot** Gmail Guard refuses and Hermes tells you. On the **first clean-up** of a big mailbox, work in stages (hourly).
 
 ---
 
@@ -237,7 +255,7 @@ Then **on your Hermes machine:**
 |---|---|
 | Access expires after 7 days | Google app is still "Testing" → phase 1, step 5 → run the assistant again |
 | "Kein Refresh-Token" | [myaccount.google.com/permissions](https://myaccount.google.com/permissions) → remove the app → run the assistant again |
-| Bot doesn't write | Pressed **Start** in the bot? User ID correct? |
+| Bot doesn't write *(bot only)* | Pressed **Start** in the bot? User ID correct? |
 | MetaMCP can't reach gmail-guard | MetaMCP **and** Gmail Guard in the same network (phase 5A, step 1) |
 | Coolify: "network coolify not found" | On the Coolify server run `docker network ls` – is the network named differently? Adjust the name in `docker-compose.coolify.yml` |
 | Second account | Run the assistant again (put the old `out/settings.env` back into `out/`!), paste into Coolify again and redeploy |

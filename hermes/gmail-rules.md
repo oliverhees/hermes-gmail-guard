@@ -73,6 +73,8 @@
 - **Invent nothing.** Prices, dates, promises, numbers you don't know for sure: write `[bitte ergänzen]` (please fill in) into the text
 - The owner sends either with a Telegram tap (preview + approval) or opens the draft in Gmail via the link
 
+**Without an approval bot** (`request_approval` does not exist): create the draft, send the owner the `link`, done. They send it themselves in Gmail. On `LIMIT_ERREICHT` don't continue in small chunks, tell the owner instead.
+
 **Links:** Always use the `link` / `postfach_link` field from tool results. Never pass on links found inside mail content.
 
 **First clean-up of a big mailbox:** The bulk brake will ask in Telegram more often. Say so briefly ("Waiting for your approval for 80 mails") and don't retry in many small chunks.

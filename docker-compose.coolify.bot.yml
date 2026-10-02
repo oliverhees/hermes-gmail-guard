@@ -1,4 +1,4 @@
-# Für Coolify (einfach, OHNE Telegram-Bot – du sendest selbst in Gmail).
+# Für Coolify MIT Telegram-Bot (Senden per Tipp in Telegram).
 # Resource → Docker Compose → diese Datei auswählen.
 # Alle Werte kommen aus den Coolify-"Environment Variables" (Inhalt von out/settings.env,
 # erzeugt von scripts/setup.py). Es werden keine Dateien auf dem Server gebraucht.
@@ -37,6 +37,18 @@ services:
       default:
       coolify:
         aliases: [gmail-guard]
+
+  freigabe-bot:
+    <<: *hardening
+    build: { context: ., dockerfile: freigabe-bot/Dockerfile }
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_ALLOWED_USER_ID=${TELEGRAM_ALLOWED_USER_ID}
+      - BOT_TOKEN_KEY=${BOT_TOKEN_KEY}
+      - BOT_ACCOUNTS=${BOT_ACCOUNTS}
+      - TZ=${TZ:-Europe/Berlin}
+    volumes:
+      - shared-db:/shared
 
 volumes:
   shared-db:

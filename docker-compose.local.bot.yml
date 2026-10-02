@@ -1,0 +1,19 @@
+# Zusatz für den Telegram-Freigabe-Bot (nur wenn du ihn willst):
+#   docker compose -f docker-compose.local.yml -f docker-compose.local.bot.yml up -d --build
+services:
+  freigabe-bot:
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    mem_limit: 512m
+    pids_limit: 200
+    build: { context: ., dockerfile: freigabe-bot/Dockerfile }
+    container_name: freigabe-bot
+    env_file: bot.env
+    volumes:
+      - shared-db:/shared
+
+volumes:
+  shared-db:
